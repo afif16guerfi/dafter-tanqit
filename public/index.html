@@ -174,8 +174,10 @@ const B=()=>cur.sub.find(s=>s.id==sub);
 const ord=()=>cur.sort=='alpha'?[...cur.st].sort((a,b)=>(a.ln+' '+a.fn).localeCompare(b.ln+' '+b.fn,'ar')):cur.st;
 const num=v=>{if(v===''||v==null)return null;const n=parseFloat(String(v).replace(',','.'));return isNaN(n)?null:n};
 const r2=v=>Math.round(+(v*100).toPrecision(12))/100,fa=v=>{if(v==null||isNaN(v)||r2(v)==0)return'00.0';const t=r2(v).toFixed(2);return t.endsWith('0')?t.slice(0,-1):t};
+const nf=x=>String(x??'').normalize('NFKC').replace(/[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g,'').replace(/[٠-٩]/g,c=>c.charCodeAt(0)-0x660).replace(/[۰-۹]/g,c=>c.charCodeAt(0)-0x6f0).replace(/[٫،]/g,'.').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/[−–—]/g,'-').replace(/[\[{]/g,'(').replace(/[\]}]/g,')'),
+fxOk=x=>/^[ccft\d+\-*\/().\s]+$/i.test(x)&&/cc|f|t/i.test(x);
 function calc(b,id){const m=b.m[id]||{},cs=b.cats.filter(c=>c.on),vs=cs.map(c=>num(m.c?.[c.id])).filter(v=>v!=null),cc=vs.length?r2(vs.reduce((a,x)=>a+x,0)):null,f=num(m.f),t=num(m.t);let av=null;
-if(cc!=null||f!=null||t!=null){try{const V={cc:cc??0,f:f??0,t:t??0},e=String(b.formula).replace(/cc|f|t/g,k=>'('+V[k]+')');if(/^[\d+\-*\/().\s]+$/.test(e)){const r=Function('return '+e)();if(isFinite(r))av=r2(r)}}catch(x){}}return{cc,f,t,av}}
+if(cc!=null||f!=null||t!=null){try{const V={cc:cc??0,f:f??0,t:t??0},e=nf(b.formula).replace(/cc|f|t/gi,k=>'('+V[k.toLowerCase()]+')');if(fxOk(nf(b.formula))&&/^[\d+\-*\/().\s]+$/.test(e)){const r=Function('return '+e)();if(isFinite(r))av=r2(r)}}catch(x){}}return{cc,f,t,av}}
 const fm=v=>v==null?'':(+v.toFixed(2)).toString();
 function classView(){const b=B(),c=cur;
 $('#app').innerHTML=`<div class="card noprint">${c.sub.length>1?`<div class="tabs">${c.sub.map(s=>`<button class="${s.id==sub?'on':''}" onclick="sub='${s.id}';render()">${esc(s.name)}</button>`).join('')}</div>`:''}
@@ -197,7 +199,7 @@ const lg=a=>{(S.log=S.log||[]).push({t:Date.now(),a});if(S.log.length>500)S.log.
 function inp(id,k,el){const b=B();let v=el.value.replace(',','.').replace(/[^\d.]/g,'');const mx=k=='f'||k=='t'?20:b.cats.find(c=>c.id==k).max,n=parseFloat(v);
 el.parentNode.classList.toggle('bad',!isNaN(n)&&n>mx);if(!isNaN(n)&&n>mx){el.value=el.dataset.old||'';return alert('العلامة القصوى: '+mx)}
 el.value=v;el.dataset.old=v;const m=b.m[id]=b.m[id]||{c:{}};m.c=m.c||{};if(k=='f'||k=='t')m[k]=v;else m.c[k]=v;lg(cur.name+' / '+b.name+': '+cur.st.find(s=>s.id==id).ln+' ['+k.slice(0,3)+'] = '+v);save();row(b,id);stats()}
-function row(b,id){const r=calc(b,id),a=$('#av_'+id);$('#cc_'+id).textContent=fm(r.cc);a.textContent=fa(r.av);a.className='ro '+(r.av==null?'':r.av>=10?'pass':'fail')}
+function row(b,id){const r=calc(b,id),a=$('#av_'+id);$('#cc_'+id).textContent=fm(r.cc);const bd=r.av==null&&(r.cc!=null||r.f!=null||r.t!=null);a.textContent=bd?'خطأ':fa(r.av);a.title=bd?'المعادلة غير صالحة: أعد كتابتها في «إعدادات المادة والتقويم»':'';a.className='ro '+(r.av==null?'':r.av>=10?'pass':'fail')}
 function kd(e,el){if(e.key=='Enter'){e.preventDefault();const l=[...document.querySelectorAll(`input[data-k="${el.dataset.k}"]`)],i=l.indexOf(el);(l[i+1]||l[0]).focus();(l[i+1]||l[0]).select()}}
 function stats(fc){const b=B();if(!b)return;const ids=cur.st.map(s=>s.id);ids.forEach(i=>row(b,i));const d=sdata(b,cur),a=d.rows.map(x=>x.av),n=d.n,ps=d.ps,R=[[16,21,'من 16 إلى 20'],[12,16,'من 12 إلى أقل من 16'],[10,12,'من 10 إلى أقل من 12'],[7,10,'من 7 إلى أقل من 10'],[5,7,'من 5 إلى أقل من 7'],[0,5,'من 0 إلى أقل من 5']];
 const e=$('#kp');if(!e)return;e.innerHTML=pdfCfg().kp?`<div class="st"><div class="a0"><span>عدد التلاميذ</span><span>${ids.length}</span></div><div class="a0"><span>المنقّطون</span><span>${n}</span></div><div class="a1"><span>الناجحون (≥10)</span><span>${ps}</span></div><div class="a1"><span>نسبة النجاح</span><span>${n?(ps/n*100).toFixed(1)+'%':'—'}</span></div><div class="a3"><span>غير الناجحين (&lt;10)</span><span>${n-ps}</span></div><div class="a3"><span>نسبة غير الناجحين</span><span>${n?((n-ps)/n*100).toFixed(1)+'%':'—'}</span></div><div class="a0"><span>معدل القسم</span><span>${n?fa(a.reduce((x,y)=>x+y,0)/n):'—'}</span></div><div class="a2"><span>أكبر علامة</span><span>${n?fa(Math.max(...a)):'—'}</span></div><div class="a3"><span>أدنى علامة</span><span>${n?fa(Math.min(...a)):'—'}</span></div>
@@ -210,7 +212,7 @@ $('#pn').innerHTML=`<div style="border-top:1px solid var(--bd);margin-top:10px;p
 <button class="g" onclick="B().cats.push({id:uid(),name:'فئة جديدة',max:4,on:1});save();render();setup()">+ فئة</button>
 <p class="mut" style="margin-top:10px">معادلة المعدل (cc = مجموع المراقبة، f = الفرض، t = الاختبار):</p><input dir="ltr" value="${esc(b.formula)}" onchange="fx(this.value)"></div>`}
 function chg(i,v){const b=B();const old=b.cats[i].max;b.cats[i].max=+v;if(b.cats.filter(x=>x.on).reduce((a,x)=>a+x.max,0)>20){b.cats[i].max=old;alert('مجموع التقويم المستمر لا يتجاوز 20')}save();render();setup()}
-function fx(v){if(!/^[ccft\d+\-*\/().\s]+$/.test(v))return alert('معادلة غير صالحة');B().formula=v;save();render();setup()}
+function fx(v){v=nf(v).trim();if(!fxOk(v))return alert('معادلة غير صالحة');try{Function('return '+v.replace(/cc|f|t/gi,'(1)'))()}catch(e){return alert('معادلة غير صالحة')}B().formula=v;save();render();setup()}
 function delSub(){if(confirm('حذف المادة ونقاطها؟')){cur.sub=cur.sub.filter(s=>s.id!=sub);sub=cur.sub[0]?.id;save();render()}}
 function studs(){$('#pn').innerHTML=`<div style="border-top:1px solid var(--bd);margin-top:10px;padding-top:10px"><div class="row"><input id="sl" placeholder="اللقب"><input id="sf" placeholder="الاسم"><button class="fit" onclick="addSt()">+ إضافة</button></div>
 <div class="row" style="margin-top:8px"><button class="fit g" onclick="tpl()">تحميل نموذج Excel</button><button class="fit g" onclick="$('#sx').click()">استيراد قائمة من Excel</button><input id="sx" type="file" class="hid" accept=".xlsx,.xls,.csv" onchange="xs(this)"></div>
