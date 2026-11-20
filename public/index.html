@@ -112,14 +112,27 @@ html[data-ut=glass] #um .box{background:var(--bg)}
 .nsk div{border:1px solid #d5dde0;border-top:4px solid var(--pp);border-radius:8px;padding:8px 10px;background:#fff;color:#111;display:flex;flex-direction:column;gap:2px}
 .nsk div span{font-size:13px;color:#556}.nsk div b{font-size:22px}
 .nsk .ok2{border-top-color:#43a982}.nsk .no2{border-top-color:#d64545}
-.nsg{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;padding:8px 14px 14px;align-items:start}
-@media(max-width:900px){.nsg{grid-template-columns:minmax(0,1fr)}}
+.nsg{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:8px 14px 14px;align-items:start}
 .nsch{padding:10px;border:1px solid #d5dde0;border-radius:8px;break-inside:avoid;min-width:0}.nsch h4{margin:0 0 6px;font-size:17px}
-.nsc,.nsw{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}.nsc svg{display:block;width:100%;min-width:560px;height:auto}
+.nsc,.nsw{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}.nsc svg{display:block;width:100%;max-width:1300px;height:auto;margin:0 auto}
 .nsc .lg{min-width:0;flex-wrap:wrap}
 .nst{width:100%;min-width:420px;border-collapse:collapse;font-size:15px}.nst th,.nst td{border:1px solid #d5dde0;padding:6px 10px;text-align:start}.nst th{background:var(--hn);color:#111}
 .nst td i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-inline-end:8px;vertical-align:middle}.nst td:last-child{width:30%}.nst u{display:block;height:10px;border-radius:5px}
-@media print{.nsx+.nsx{break-before:page}.nsc,.nsw{overflow:visible}.nsc svg{min-width:0}.nst{min-width:0}.nsg{grid-template-columns:minmax(0,1fr)}}
+@media print{.nsx+.nsx{break-before:page}.nsc,.nsw{overflow:visible}.nsc svg{min-width:0!important}.nst{min-width:0}.nsg{grid-template-columns:minmax(0,1fr)}}
+/* محرر المعادلة */
+.fed{border:1px solid var(--bd);border-radius:var(--r);padding:12px;margin-top:14px;background:color-mix(in srgb,var(--tbl) 30%,transparent)}
+.fed h3{margin:0 0 6px;font-size:18px}.fed h4{margin:12px 0 4px;font-size:14px;color:var(--mut)}
+.fp{display:flex;flex-wrap:wrap;gap:6px;direction:ltr;justify-content:flex-end}
+.fz{display:flex;flex-wrap:wrap;align-items:center;gap:2px;min-height:70px;padding:10px;border:2px dashed var(--teal);border-radius:var(--ri);background:var(--card)}
+.fc{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:36px;min-height:38px;padding:3px 10px;border-radius:8px;border:1px solid var(--bd);cursor:pointer;font-weight:700;font-size:19px;line-height:1.1;user-select:none;color:#111}
+.fc.pal{cursor:grab}.fc small{font-size:10px;font-weight:600;font-family:var(--ff);color:#445}
+.fc.var{background:#dff3e0;border-color:#9ccc9f}.fc.op{background:#ffe9c7;border-color:#e8c27a}.fc.par{background:#e3e3f7;border-color:#b5b5e0}.fc.num{background:#dbeaf8;border-color:#9fc3e8}
+.fc.sel{outline:3px solid var(--teal);outline-offset:1px}.fc.bad{outline:3px solid #d33;background:#ffd9d9}.fc.dov{box-shadow:-6px 0 0 #f5a623}
+.fg{display:inline-block;width:8px;height:40px;border-radius:4px;cursor:text}.fg.cur{background:var(--teal);animation:fbl 1s steps(2) infinite}.fg.dov{background:#f5a623;width:16px}
+@keyframes fbl{50%{opacity:.2}}
+.fm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:21px;font-weight:700;padding:10px;border:1px solid var(--bd);border-radius:var(--ri);background:var(--card)}
+.fm .mv{background:color-mix(in srgb,var(--teal) 20%,var(--card));padding:1px 8px;border-radius:6px;font-size:17px}.fm .mo{color:#c26a00}
+.fs{margin-top:8px;font-weight:700}.fs.ok{color:#0a7a2f}.fs.er{color:#c00}
 </style>
 </head>
 <body>
@@ -136,7 +149,7 @@ async function push(){tm=0;if(busy){again=true;return}busy=true;try{const r=awai
 addEventListener('visibilitychange',()=>{if(document.hidden&&tm){clearTimeout(tm);push()}});
 const TN={1:'الأول',2:'الثاني',3:'الثالث'};
 function home(){cur=null;nsOn=false;render()}
-function render(){$('#app').style.maxWidth=(cur&&nsOn&&!(ME&&ME.role=='admin'))?'1600px':'';if(ME&&ME.role=='admin')return adminView();$('#hs').textContent=S.p.name?('الأستاذ: '+S.p.name):'';cur?(nsOn?nsView():classView()):homeView()}
+function render(){$('#app').style.maxWidth=(cur&&nsOn&&!(ME&&ME.role=='admin'))?'1900px':'';if(ME&&ME.role=='admin')return adminView();$('#hs').textContent=S.p.name?('الأستاذ: '+S.p.name):'';cur?(nsOn?nsView():classView()):homeView()}
 function homeView(){
 const p=S.p,seasons=[...new Set(S.cl.map(c=>c.season))],f=S.cl.filter(c=>(!fs||c.season==fs)&&(!ft||c.term==ft)&&(!!c.ar==!!sa));
 $('#app').innerHTML=`<div class="card"><h2>بيانات الأستاذ</h2><div class="row">
@@ -174,10 +187,92 @@ const B=()=>cur.sub.find(s=>s.id==sub);
 const ord=()=>cur.sort=='alpha'?[...cur.st].sort((a,b)=>(a.ln+' '+a.fn).localeCompare(b.ln+' '+b.fn,'ar')):cur.st;
 const num=v=>{if(v===''||v==null)return null;const n=parseFloat(String(v).replace(',','.'));return isNaN(n)?null:n};
 const r2=v=>Math.round(+(v*100).toPrecision(12))/100,fa=v=>{if(v==null||isNaN(v)||r2(v)==0)return'00.0';const t=r2(v).toFixed(2);return t.endsWith('0')?t.slice(0,-1):t};
-const nf=x=>String(x??'').normalize('NFKC').replace(/[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g,'').replace(/[٠-٩]/g,c=>c.charCodeAt(0)-0x660).replace(/[۰-۹]/g,c=>c.charCodeAt(0)-0x6f0).replace(/[٫،]/g,'.').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/[−–—]/g,'-').replace(/[\[{]/g,'(').replace(/[\]}]/g,')'),
-fxOk=x=>/^[ccft\d+\-*\/().\s]+$/i.test(x)&&/cc|f|t/i.test(x);
+const nf=x=>String(x??'').normalize('NFKC').replace(/[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g,'').replace(/[٠-٩]/g,c=>c.charCodeAt(0)-0x660).replace(/[۰-۹]/g,c=>c.charCodeAt(0)-0x6f0).replace(/[٫،]/g,'.').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/[−–—]/g,'-').replace(/[\[{]/g,'(').replace(/[\]}]/g,')');
+/* ===== محرك المعادلات: محلل رياضي آمن (بدون eval ولا Function — لأن سياسة الأمان CSP تمنعهما) ===== */
+const FDEF='(cc+f+t*2)/4',OPD={'+':'+','-':'−','*':'×','/':'÷'},
+FV=b=>[{k:'cc',n:'المراقبة المستمرة (المجموع)',s:'مراقبة'},{k:'f',n:'الفرض',s:'الفرض'},{k:'t',n:'الاختبار',s:'الاختبار'},...b.cats.map((c,i)=>({k:'k'+(i+1),n:c.name+' ('+c.max+' ن)'+(c.on?'':' — معطّلة'),s:c.name}))];
+function fTok(src){const s=nf(src),T=[];let i=0;
+ while(i<s.length){const ch=s[i];if(/\s/.test(ch)){i++;continue}
+  let m=/^(\d+\.?\d*|\.\d+)/.exec(s.slice(i));if(m){T.push({t:'num',v:m[1]});i+=m[1].length;continue}
+  m=/^[a-z]+\d*/i.exec(s.slice(i));if(m){T.push({t:'var',v:m[0].toLowerCase()});i+=m[0].length;continue}
+  if('+-*/'.includes(ch)){T.push({t:'op',v:ch});i++;continue}
+  if(ch=='('||ch==')'){T.push({t:'par',v:ch});i++;continue}
+  throw{msg:'رمز غير مسموح: «'+ch+'»',pos:T.length}}
+ return T}
+function fParse(T,vars){let p=0;const err=(msg,pos)=>{throw{msg,pos}};
+ function expr(){let a=term();while(p<T.length&&T[p].t=='op'&&(T[p].v=='+'||T[p].v=='-')){const op=T[p].v,i=p++;a={n:'bin',op,a,b:term(),i}}return a}
+ function term(){let a=un();while(p<T.length&&T[p].t=='op'&&(T[p].v=='*'||T[p].v=='/')){const op=T[p].v,i=p++;a={n:'bin',op,a,b:un(),i}}return a}
+ function un(){if(p<T.length&&T[p].t=='op'&&(T[p].v=='-'||T[p].v=='+')){const op=T[p++].v,a=un();return op=='-'?{n:'neg',a}:a}return prim()}
+ function prim(){const k=T[p];
+  if(!k)err('المعادلة غير مكتملة: تنتهي بعملية وينقص بعدها رقم أو متغير',T.length-1);
+  if(k.t=='num'){p++;return{n:'num',v:parseFloat(k.v)}}
+  if(k.t=='var'){if(vars&&!vars.has(k.v))err('متغير غير معروف: «'+k.v+'»',p);p++;return{n:'var',k:k.v}}
+  if(k.t=='par'&&k.v=='('){const o=p++;if(T[p]&&T[p].t=='par'&&T[p].v==')')err('قوسان فارغان بلا محتوى',p);const e=expr();if(T[p]&&T[p].v!=')')err('ينقص رمز عملية (+ − × ÷) قبل هذا العنصر',p);if(!T[p])err('قوس مفتوح لم يُغلق',o);p++;return e}
+  if(k.t=='par')err('قوس إغلاق في غير موضعه (ينقص رقم أو متغير قبله)',p);
+  err('عملية غير مكتملة عند «'+OPD[k.v]+'»: ينقص رقم أو متغير قبلها',p)}
+ if(!T.length)err('المعادلة فارغة',0);
+ const r=expr();
+ if(p<T.length){const k=T[p];err(k.t=='par'&&k.v==')'?'قوس إغلاق زائد بلا قوس مفتوح':'ينقص رمز عملية (+ − × ÷) قبل هذا العنصر',p)}
+ return r}
+function fConst(a){if(a.n=='num')return a.v;if(a.n=='var')return null;if(a.n=='neg'){const x=fConst(a.a);return x==null?null:-x}
+ const x=fConst(a.a),y=fConst(a.b);if(x==null||y==null)return null;return a.op=='+'?x+y:a.op=='-'?x-y:a.op=='*'?x*y:(y===0?null:x/y)}
+function fZero(a){if(a.n=='num'||a.n=='var')return null;if(a.n=='neg')return fZero(a.a);
+ if(a.op=='/'&&fConst(a.b)===0)return a.i;return fZero(a.a)??fZero(a.b)}
+function fCheck(T,b){try{const ast=fParse(T,new Set(FV(b).map(x=>x.k))),z=fZero(ast);if(z!=null)return{ok:false,msg:'قسمة على صفر: المقسوم عليه يساوي 0 دائماً',pos:z};return{ok:true,ast}}catch(e){return{ok:false,msg:e.msg||'صيغة غير صالحة',pos:e.pos??0}}}
+function fEval(a,E){if(a.n=='num')return a.v;if(a.n=='var')return E[a.k]??0;if(a.n=='neg')return-fEval(a.a,E);
+ const x=fEval(a.a,E),y=fEval(a.b,E);if(a.op=='+')return x+y;if(a.op=='-')return x-y;if(a.op=='*')return x*y;if(y===0)throw{msg:'قسمة على صفر',pos:a.i};return x/y}
+const FC=new Map(),fSer=T=>T.map(t=>t.v).join('');
+function fComp(src,b){const key=String(src)+'|'+b.cats.length;let r=FC.get(key);if(r)return r;
+ try{r=fCheck(fTok(src||FDEF),b)}catch(e){r={ok:false,msg:e.msg,pos:e.pos}}if(FC.size>200)FC.clear();FC.set(key,r);return r}
+function fEnv(b,m,cc,f,t){const E={cc:cc??0,f:f??0,t:t??0};b.cats.forEach((k,i)=>{E['k'+(i+1)]=k.on?(num(m.c?.[k.id])??0):0});return E}
 function calc(b,id){const m=b.m[id]||{},cs=b.cats.filter(c=>c.on),vs=cs.map(c=>num(m.c?.[c.id])).filter(v=>v!=null),cc=vs.length?r2(vs.reduce((a,x)=>a+x,0)):null,f=num(m.f),t=num(m.t);let av=null;
-if(cc!=null||f!=null||t!=null){try{const V={cc:cc??0,f:f??0,t:t??0},e=nf(b.formula).replace(/cc|f|t/gi,k=>'('+V[k.toLowerCase()]+')');if(fxOk(nf(b.formula))&&/^[\d+\-*\/().\s]+$/.test(e)){const r=Function('return '+e)();if(isFinite(r))av=r2(r)}}catch(x){}}return{cc,f,t,av}}
+if(cc!=null||f!=null||t!=null){const k=fComp(b.formula,b);if(k.ok){try{const r=fEval(k.ast,fEnv(b,m,cc,f,t));if(isFinite(r))av=r2(r)}catch(x){}}}return{cc,f,t,av}}
+/* ===== محرر تركيب معادلة المعدل الفصلي للمادة ===== */
+let FE={sid:null,T:[],caret:0,sel:-1,rep:0,pv:{},note:'',res:''};
+function feInit(b){FE={sid:b.id,T:[],caret:0,sel:-1,rep:0,pv:{},note:'',res:''};try{FE.T=fTok(b.formula||FDEF)}catch(e){FE.note='⚠ المعادلة المحفوظة غير صالحة ('+e.msg+'). ركّب معادلة جديدة واعتمدها.'}FE.caret=FE.T.length}
+const feTxt=(t,V)=>t.t=='var'?`<b>${t.v}</b><small>${esc(((V.find(x=>x.k==t.v)||{}).s||'؟').slice(0,13))}</small>`:t.t=='op'?OPD[t.v]:t.v;
+function feRender(){const e=$('#fe');if(!e)return;const b=B(),V=FV(b),T=FE.T,ck=fCheck(T,b),bad=ck.ok?-1:ck.pos;
+ const pal=(t,v,l,x)=>`<span class="fc ${t} pal" role="button" tabindex="0" draggable="true" ondragstart="feDS(event,'new','${t}','${v}')" onclick="${t=='num'?`feDig('${v}')`:`feAdd('${t}','${v}')`}" title="${esc(x||'')}">${l}</span>`;
+ const gap=i=>`<i class="fg ${FE.caret==i?'cur':''}" onclick="feCaret(${i})" ondragover="feOv(event)" ondragleave="feLv(event)" ondrop="feDrop(event,${i})"></i>`;
+ let zone=gap(0);T.forEach((t,i)=>{zone+=`<span class="fc ${t.t} ${i==FE.sel?'sel':''} ${i==bad?'bad':''}" draggable="true" ondragstart="feDS(event,'mv',${i})" onclick="feSel(${i})" ${t.t=='num'?`ondblclick="feNum(${i})" title="انقر مرتين لتغيير الرقم"`:''} ondragover="feOv(event)" ondragleave="feLv(event)" ondrop="feDrop(event,${i})">${feTxt(t,V)}</span>`+gap(i+1)});
+ const used=[...new Set(T.filter(t=>t.t=='var'&&V.some(x=>x.k==t.v)).map(t=>t.v))];
+ const math=T.length?T.map(t=>t.t=='var'?`<bdi class="mv">${esc((V.find(x=>x.k==t.v)||{s:'؟'}).s)}</bdi>`:t.t=='op'?`<span class="mo">${OPD[t.v]}</span>`:`<span>${t.v}</span>`).join(''):'<span class="mut">— المعادلة فارغة —</span>';
+ e.innerHTML=`<div class="fed"><h3>تركيب معادلة المعدل الفصلي للمادة</h3>
+<p class="mut">اسحب الرموز والمتغيرات إلى مساحة المعادلة، أو انقر عليها لإضافتها عند المؤشر (الخط الوامض). انقر على عنصر لتحديده ثم احذفه أو غيّر مكانه أو استبدله.</p>
+<h4>المتغيرات (مرتبطة بنقاط كل تلميذ)</h4><div class="fp">${V.map(v=>pal('var',v.k,`<b>${v.k}</b><small>${esc(v.s.slice(0,13))}</small>`,v.n)).join('')}</div>
+<h4>العمليات والأقواس</h4><div class="fp">${['(',')'].map(x=>pal('par',x,x)).join('')}${['+','-','*','/'].map(x=>pal('op',x,OPD[x],'')).join('')}</div>
+<h4>الأرقام والفاصلة العشرية</h4><div class="fp">${[0,1,2,3,4,5,6,7,8,9,'.'].map(x=>pal('num',x,x=='.'?'٫':x)).join('')}</div>
+<h4>مساحة المعادلة</h4><div class="fz" dir="ltr" ondragover="feOv(event)" ondragleave="feLv(event)" ondrop="feDrop(event,${T.length})">${zone}</div>
+<div class="row" style="margin-top:8px"><button class="fit g" onclick="feBack()">⌫ حذف ما قبل المؤشر</button>${FE.sel>=0?`<button class="fit g" onclick="feDel()">🗑 حذف المحدد</button><button class="fit g" onclick="feMove(-1)">← تحريك لليسار</button><button class="fit g" onclick="feMove(1)">تحريك لليمين →</button><button class="fit ${FE.rep?'':'g'}" onclick="FE.rep=!FE.rep;feRender()">${FE.rep?'انقر رمزاً لاستبدال المحدد…':'استبدال المحدد'}</button>`:''}<button class="fit d" onclick="feClear()">مسح الكل</button></div>
+<h4>العرض الرياضي</h4><div class="fm" dir="ltr"><span class="mo">=</span>${math}<bdi class="mv" style="order:-1">المعدل</bdi></div>
+<div class="fs ${ck.ok?'ok':'er'}">${ck.ok?'✓ الصيغة سليمة وقابلة للتنفيذ':'✗ '+esc(ck.msg)+(T.length?' — عند العنصر رقم '+(bad+1):'')}</div>${FE.note?`<div class="fs">${esc(FE.note)}</div>`:''}
+<h4>معاينة نتيجة المعادلة</h4><div class="row"><select onchange="feStud(this.value)"><option value="">اختر تلميذاً لملء قيمه…</option>${cur.st.map(s=>`<option value="${s.id}">${esc(s.ln+' '+s.fn)}</option>`).join('')}</select></div>
+<div class="row" style="margin-top:6px">${used.map(k=>`<label class="fit" style="display:flex;gap:6px;align-items:center">${esc(V.find(x=>x.k==k).s)} <b dir="ltr">${k}</b><input dir="ltr" inputmode="decimal" style="width:80px" value="${esc(FE.pv[k]??'')}" placeholder="0" oninput="FE.pv['${k}']=this.value"></label>`).join('')||'<span class="mut">لا متغيرات في المعادلة</span>'}</div>
+<div class="row" style="margin-top:8px"><button class="fit g" onclick="feRun()">معاينة نتيجة المعادلة</button><button class="fit" onclick="feSave()">حفظ المعادلة واعتمادها</button><button class="fit g" onclick="feReset()">إعادة الضبط إلى الصيغة الافتراضية</button></div>
+<div class="fs" id="fr">${FE.res}</div>
+<details style="margin-top:8px"><summary>الصيغة النصية (متقدم)</summary><input dir="ltr" value="${esc(fSer(T))}" onchange="feText(this.value)"><p class="mut">المعتمدة حالياً لهذه المادة: <bdi dir="ltr">${esc(b.formula||FDEF)}</bdi></p></details></div>`}
+function feDS(ev,k,a,b){ev.dataTransfer.setData('text/plain',JSON.stringify(k=='mv'?{k,i:a}:{k,t:a,v:b}));ev.dataTransfer.effectAllowed='move'}
+const feOv=ev=>{ev.preventDefault();ev.currentTarget.classList.add('dov')},feLv=ev=>ev.currentTarget.classList.remove('dov');
+function feDrop(ev,i){ev.preventDefault();ev.stopPropagation();ev.currentTarget.classList.remove('dov');let d;try{d=JSON.parse(ev.dataTransfer.getData('text/plain'))}catch(x){return}
+ if(d.k=='new'){const T=FE.T;if(d.t=='num'){const p=T[i-1];if(p&&p.t=='num'&&!(d.v=='.'&&p.v.includes('.'))){p.v+=d.v;FE.caret=i}else{T.splice(i,0,{t:'num',v:d.v=='.'?'0.':d.v});FE.caret=i+1}}else{T.splice(i,0,{t:d.t,v:d.v});FE.caret=i+1}}
+ else if(d.k=='mv'){const T=FE.T,[x]=T.splice(d.i,1),j=i>d.i?i-1:i;T.splice(j,0,x);FE.caret=j+1}
+ FE.sel=-1;FE.res='';feRender()}
+function feCaret(i){FE.caret=i;FE.sel=-1;FE.rep=0;feRender()}
+function feSel(i){FE.sel=FE.sel==i?-1:i;FE.rep=0;FE.caret=i+1;feRender()}
+function feAdd(t,v){if(FE.rep&&FE.sel>=0){FE.T[FE.sel]={t,v};FE.rep=0}else{FE.T.splice(FE.caret,0,{t,v});FE.caret++}FE.res='';feRender()}
+function feDig(d){const T=FE.T;if(FE.rep&&FE.sel>=0){T[FE.sel]={t:'num',v:d=='.'?'0.':d};FE.rep=0}else{const p=T[FE.caret-1];if(p&&p.t=='num'){if(d=='.'&&p.v.includes('.'))return;p.v+=d}else{T.splice(FE.caret,0,{t:'num',v:d=='.'?'0.':d});FE.caret++}}FE.res='';feRender()}
+function feNum(i){const v=prompt('قيمة الرقم',FE.T[i].v);if(v==null)return;const n=nf(v).trim();if(!/^(\d+\.?\d*|\.\d+)$/.test(n))return alert('رقم غير صالح');FE.T[i].v=n;FE.res='';feRender()}
+function feBack(){if(FE.caret>0){FE.T.splice(FE.caret-1,1);FE.caret--;FE.sel=-1;FE.res='';feRender()}}
+function feDel(){if(FE.sel<0)return;FE.T.splice(FE.sel,1);FE.caret=Math.min(FE.sel,FE.T.length);FE.sel=-1;FE.rep=0;FE.res='';feRender()}
+function feMove(d){const i=FE.sel,j=i+d,T=FE.T;if(i<0||j<0||j>=T.length)return;[T[i],T[j]]=[T[j],T[i]];FE.sel=j;FE.caret=j+1;FE.res='';feRender()}
+function feClear(){FE.T=[];FE.caret=0;FE.sel=-1;FE.rep=0;FE.res='';feRender()}
+function feText(v){try{FE.T=fTok(v);FE.caret=FE.T.length;FE.sel=-1;FE.note=''}catch(e){FE.note='✗ '+e.msg}FE.res='';feRender()}
+function feStud(id){if(!id)return;const b=B(),m=b.m[id]||{},r=calc(b,id);FE.pv={cc:r.cc??'',f:r.f??'',t:r.t??''};b.cats.forEach((k,i)=>{FE.pv['k'+(i+1)]=k.on?(num(m.c?.[k.id])??''):''});FE.res='';feRender()}
+function feRun(){const b=B(),ck=fCheck(FE.T,b),e=$('#fr');if(!ck.ok){FE.res='✗ '+ck.msg;e.className='fs er';e.textContent=FE.res;return}
+ const E={};FV(b).forEach(v=>E[v.k]=num(FE.pv[v.k])??0);try{const r=fEval(ck.ast,E),sub=FE.T.map(t=>t.t=='var'?'('+E[t.v]+')':t.t=='op'?OPD[t.v]:t.v).join(' ');FE.res=`النتيجة: ${fa(r)}  ⟵  ${sub}${r2(r)>20?'  (تنبيه: النتيجة أكبر من 20)':''}`;e.className='fs ok'}catch(x){FE.res='✗ '+(x.msg||'خطأ في الحساب');e.className='fs er'}e.textContent=FE.res}
+function feSave(){const b=B(),ck=fCheck(FE.T,b);if(!ck.ok){FE.res='✗ لا يمكن الاعتماد: '+ck.msg;feRender();return alert(ck.msg)}
+ b.formula=fSer(FE.T);FE.note='✓ تم حفظ المعادلة واعتمادها: '+b.formula+' — حُدّثت المعدلات.';lg(cur.name+' / '+b.name+': معادلة = '+b.formula);save();render();setup()}
+function feReset(){if(!confirm('إعادة معادلة هذه المادة إلى الصيغة الافتراضية '+FDEF+' ؟'))return;const b=B();b.formula=FDEF;save();render();feInit(b);FE.note='✓ أُعيدت المعادلة الافتراضية واعتُمدت.';setup()}
 const fm=v=>v==null?'':(+v.toFixed(2)).toString();
 function classView(){const b=B(),c=cur;
 $('#app').innerHTML=`<div class="card noprint">${c.sub.length>1?`<div class="tabs">${c.sub.map(s=>`<button class="${s.id==sub?'on':''}" onclick="sub='${s.id}';render()">${esc(s.name)}</button>`).join('')}</div>`:''}
@@ -210,9 +305,8 @@ function setup(){const b=B(),tot=b.cats.filter(x=>x.on).reduce((a,x)=>a+(+x.max|
 $('#pn').innerHTML=`<div style="border-top:1px solid var(--bd);margin-top:10px;padding-top:10px"><div class="row"><input value="${esc(b.name)}" ${ME&&ME.subject?'readonly':''} onchange="${cur.sub.length>1?'B().name=this.value;save();render()':'setSubj(this.value);setup()'}">${cur.sub.length>1?'<button class="fit d" onclick="delSub()">حذف المادة</button>':''}</div>
 <p class="mut">فئات التقويم المستمر (المجموع ${tot} من 20 كحد أقصى):</p>${b.cats.map((x,i)=>`<div class="cat"><input value="${esc(x.name)}" onchange="B().cats[${i}].name=this.value;save();render();setup()"><input type="number" min="0.5" step="0.5" value="${x.max}" onchange="chg(${i},this.value)"><button class="g" title="تعطيل" onclick="B().cats[${i}].on=B().cats[${i}].on?0:1;save();render();setup()">${x.on?'●':'○'}</button><button class="d" onclick="B().cats.splice(${i},1);save();render();setup()">×</button></div>`).join('')}
 <button class="g" onclick="B().cats.push({id:uid(),name:'فئة جديدة',max:4,on:1});save();render();setup()">+ فئة</button>
-<p class="mut" style="margin-top:10px">معادلة المعدل (cc = مجموع المراقبة، f = الفرض، t = الاختبار):</p><input dir="ltr" value="${esc(b.formula)}" onchange="fx(this.value)"></div>`}
+<div id="fe"></div></div>`;if(FE.sid!=b.id)feInit(b);feRender()}
 function chg(i,v){const b=B();const old=b.cats[i].max;b.cats[i].max=+v;if(b.cats.filter(x=>x.on).reduce((a,x)=>a+x.max,0)>20){b.cats[i].max=old;alert('مجموع التقويم المستمر لا يتجاوز 20')}save();render();setup()}
-function fx(v){v=nf(v).trim();if(!fxOk(v))return alert('معادلة غير صالحة');try{Function('return '+v.replace(/cc|f|t/gi,'(1)'))()}catch(e){return alert('معادلة غير صالحة')}B().formula=v;save();render();setup()}
 function delSub(){if(confirm('حذف المادة ونقاطها؟')){cur.sub=cur.sub.filter(s=>s.id!=sub);sub=cur.sub[0]?.id;save();render()}}
 function studs(){$('#pn').innerHTML=`<div style="border-top:1px solid var(--bd);margin-top:10px;padding-top:10px"><div class="row"><input id="sl" placeholder="اللقب"><input id="sf" placeholder="الاسم"><button class="fit" onclick="addSt()">+ إضافة</button></div>
 <div class="row" style="margin-top:8px"><button class="fit g" onclick="tpl()">تحميل نموذج Excel</button><button class="fit g" onclick="$('#sx').click()">استيراد قائمة من Excel</button><input id="sx" type="file" class="hid" accept=".xlsx,.xls,.csv" onchange="xs(this)"></div>
@@ -416,12 +510,12 @@ function nsData(b,c,type,crit){
  const bands=NB.slice(0,6).map((lo,i)=>({lo:lo*max,hi:NB[i+1]*max,l:f1(lo*max)+'–'+f1(NB[i+1]*max)}));
  const dist=bands.map((q,i)=>a.filter(v=>v>=q.lo-NE&&(i==5||v<q.hi-NE)).length);
  return{max,N:c.st.length,n,miss:c.st.length-n,pass,fail:n-pass,avg:n?a.reduce((x,y)=>x+y,0)/n:null,hi:n?Math.max(...a):null,lo:n?Math.min(...a):null,dist,bands,rows:e}}
-const NW=640,nsv=(h,b)=>`<svg viewBox="0 0 ${NW} ${h}" role="img" font-family="Cairo,Tahoma,sans-serif">${b}</svg>`,
+const NW=780,nsv=(h,b,w)=>`<svg viewBox="0 0 ${w||NW} ${h}" style="min-width:${w||NW}px" role="img" font-family="Cairo,Tahoma,sans-serif">${b}</svg>`,
 nax=(top,L,R,T,ph)=>{let s='';const st=top<=5?1:top/5;for(let t=0;t<=top+1e-9;t+=st){const y=T+ph-t/top*ph;s+=`<line x1="${L}" x2="${R}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${t?'#e1e5e8':'#8a949b'}"/>`+tx(R+8,y+4,f1(t),{a:'start',s:12,f:'#667'})}return s};
 function nBar(d){const H=310,L=14,R=NW-50,T=34,Bt=66,ph=H-T-Bt,bw=(R-L)/6,top=niceMax(Math.max(...d.dist,1));let s=nax(top,L,R,T,ph);
  d.dist.forEach((v,i)=>{const cx=R-(i+.5)*bw,h=v/top*ph,y=T+ph-h;s+=`<rect x="${(cx-bw*.3).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*.6).toFixed(1)}" height="${h.toFixed(1)}" rx="4" fill="${CC[i]}"/>`+(v?tx(cx,y-7,v,{s:15,w:800}):'')+tx(cx,T+ph+20,d.bands[i].l,{s:12.5,w:600})+tx(cx,T+ph+40,pcs(v,d.n),{s:12,f:'#667'})});return nsv(H,s)}
-function nHbar(d){const H=310,T=10,rh=(H-T-10)/6,top=Math.max(...d.dist,1),tr=NW-125,tl=190,mx=tr-tl;let s='';
- for(let k=0;k<6;k++){const i=5-k,v=d.dist[i],y=T+k*rh,len=v/top*mx,by=(y+rh*.18).toFixed(1),bh=(rh*.64).toFixed(1);s+=tx(NW-10,y+rh/2+5,d.bands[i].l,{a:'end',s:14,w:600})+`<rect x="${tl}" y="${by}" width="${mx}" height="${bh}" rx="5" fill="#eef1f3"/>`+(len?`<rect x="${(tr-len).toFixed(1)}" y="${by}" width="${len.toFixed(1)}" height="${bh}" rx="5" fill="${CC[i]}"/>`:'')+tx(tl-10,y+rh/2+5,`${v} · ${pcs(v,d.n)}`,{a:'end',s:13,w:700})}return nsv(H,s)}
+function nHbar(d){const lw=Math.max(...d.bands.map(q=>q.l.length))*10+36,vw=170,tw=Math.max(460,NW-lw-vw-80),tl=28+vw+14,tr=tl+tw,W2=tr+12+lw+28,H=340,T=12,rh=(H-T-12)/6,top=Math.max(...d.dist,1);let s='';
+ for(let k=0;k<6;k++){const i=5-k,v=d.dist[i],y=T+k*rh,len=v/top*tw,by=(y+rh*.16).toFixed(1),bh=(rh*.68).toFixed(1);s+=tx(W2-28,y+rh/2+6,d.bands[i].l,{a:'end',s:15,w:600})+`<rect x="${tl}" y="${by}" width="${tw}" height="${bh}" rx="6" fill="#eef1f3"/>`+(len?`<rect x="${(tr-len).toFixed(1)}" y="${by}" width="${len.toFixed(1)}" height="${bh}" rx="6" fill="${CC[i]}"/>`:'')+tx(tl-14,y+rh/2+6,`${v} · ${pcs(v,d.n)}`,{a:'end',s:15,w:700})}return nsv(H,s,W2)}
 function nRing(sl,ri,mid){const tot=sl.reduce((a,x)=>a+x.v,0),H=320,cx=NW/2,cy=160,r=140,rm=ri?(r+ri)/2:r*.62,nz=sl.filter(x=>x.v);let s='',a=-Math.PI/2;
  const lab=(x,ang,fr)=>fr<.06?'':tx(cx+rm*Math.cos(ang),cy+rm*Math.sin(ang)-2,x.v,{s:17,w:800,f:'#fff',x:HALO})+tx(cx+rm*Math.cos(ang),cy+rm*Math.sin(ang)+15,pcs(x.v,tot),{s:13,w:700,f:'#fff',x:HALO});
  if(nz.length==1){const x=nz[0];s+=ri?`<circle cx="${cx}" cy="${cy}" r="${rm}" fill="none" stroke="${x.c}" stroke-width="${r-ri}"/>`:`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${x.c}"/>`;s+=lab(x,-Math.PI/2,1)}
