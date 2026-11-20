@@ -5,7 +5,7 @@ const app=express();app.set('trust proxy',1);
 app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'","'unsafe-inline'","https://cdnjs.cloudflare.com"],scriptSrcAttr:["'unsafe-inline'"],styleSrc:["'self'","'unsafe-inline'","https://fonts.googleapis.com"],fontSrc:["https://fonts.gstatic.com"],imgSrc:["'self'","data:"],connectSrc:["'self'"],upgradeInsecureRequests:null}}}));
 app.use(express.json({limit:'12mb'}));
 let db;const col=n=>db.collection(n),oid=x=>ObjectId.isValid(x)?new ObjectId(x):null;
-const pub=u=>({id:String(u._id),username:u.username,name:u.name,role:u.role,active:u.active});
+const pub=u=>({id:String(u._id),username:u.username,name:u.name,role:u.role,active:u.active,subject:u.subject||''});
 const audit=(uid,action,detail)=>col('audit').insertOne({uid,action,detail,at:new Date()}).catch(()=>{});
 const wrap=f=>(q,s,n)=>f(q,s,n).catch(e=>{console.error(e);s.status(500).json({error:'خطأ في الخادم'})});
 const auth=roles=>wrap(async(q,s,n)=>{let p;try{p=jwt.verify((q.headers.authorization||'').slice(7),JWT_SECRET)}catch(e){return s.status(401).json({error:'انتهت الجلسة، سجّل الدخول من جديد'})}
@@ -39,10 +39,11 @@ const A=auth(['admin']);
 app.get('/api/users',A,wrap(async(q,s)=>{const l=await col('users').find({}).sort({role:1,name:1}).toArray();s.json({users:l.map(pub)})}));
 app.post('/api/users',A,wrap(async(q,s)=>{const b=q.body||{},username=String(b.username||'').trim().toLowerCase(),pw=String(b.password||'');
  if(!/^[a-z0-9._-]{3,30}$/.test(username))return bad(s,'اسم المستخدم: 3 إلى 30 حرفاً لاتينياً أو أرقاماً');if(pw.length<8)return bad(s,'كلمة المرور قصيرة (8 أحرف على الأقل)');
- try{const r=await col('users').insertOne({username,hash:await bcrypt.hash(pw,10),name:String(b.name||'').trim().slice(0,100),role:'teacher',active:true,createdAt:new Date()});audit(q.user._id,'create_user',username);s.json({id:String(r.insertedId)})}
+ try{const r=await col('users').insertOne({username,hash:await bcrypt.hash(pw,10),name:String(b.name||'').trim().slice(0,100),subject:String(b.subject||'').trim().slice(0,100),role:'teacher',active:true,createdAt:new Date()});audit(q.user._id,'create_user',username);s.json({id:String(r.insertedId)})}
  catch(e){if(e.code===11000)return bad(s,'اسم المستخدم مستعمل');throw e}}));
 app.patch('/api/users/:id',A,wrap(async(q,s)=>{const id=oid(q.params.id);if(!id)return bad(s,'معرّف غير صالح');const b=q.body||{},set={};
  if(b.name!=null)set.name=String(b.name).trim().slice(0,100);
+ if(b.subject!=null)set.subject=String(b.subject).trim().slice(0,100);
  if(b.password!=null){if(String(b.password).length<8)return bad(s,'كلمة المرور قصيرة (8 أحرف على الأقل)');set.hash=await bcrypt.hash(String(b.password),10)}
  if(b.toggle){const u=await col('users').findOne({_id:id});if(!u)return s.status(404).json({error:'غير موجود'});if(String(id)===String(q.user._id))return bad(s,'لا يمكنك تعطيل حسابك');set.active=!u.active}
  if(!Object.keys(set).length)return bad(s,'لا تغييرات');const r=await col('users').updateOne({_id:id},{$set:set});if(!r.matchedCount)return s.status(404).json({error:'غير موجود'});
