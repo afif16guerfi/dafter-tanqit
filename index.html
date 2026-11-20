@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دفتر التنقيط</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f3f6f7;--card:#fff;--ink:#222;--mut:#667;--teal:#22bfc7;--dark:#2b2b2b;--line:#222;--bd:#d5dde0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1f21;--card:#262b2d;--ink:#eee;--mut:#9ab;--bd:#3a4245}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,sans-serif;font-size:16px}
+header.top{background:var(--dark);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 14px;position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+header.top b{font-size:20px;color:var(--teal)}header.top span{flex:1}
+main{max-width:1200px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px}
+h2{margin:0 0 10px;font-size:18px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.row>*{flex:1 1 150px}.row>button,.row>.fit{flex:0 0 auto}
+input,select,button{font:inherit;padding:9px 10px;border:1px solid var(--bd);border-radius:7px;background:var(--card);color:var(--ink);min-height:42px}
+button{cursor:pointer;background:var(--teal);color:#06292b;border:0;font-weight:600}
+button.g{background:transparent;color:var(--ink);border:1px solid var(--bd)}button.d{background:#e66;color:#fff}
+.cls{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;border:1px solid var(--bd);border-radius:8px;margin-bottom:8px}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}.tabs button{background:transparent;color:var(--ink);border:1px solid var(--bd);white-space:nowrap}.tabs button.on{background:var(--teal);color:#06292b}
+.sheet{background:#fff;color:#111;border:1px solid var(--bd);border-radius:6px;overflow:hidden}
+.band{display:flex;justify-content:space-between;align-items:stretch;background:var(--teal);color:#fff;font-weight:800;font-size:20px}
+.band .a{background:var(--dark);padding:8px 18px;clip-path:polygon(0 0,100% 0,88% 100%,0 100%);padding-left:30px}
+.band .b{padding:8px 18px}
+.meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 20px;padding:10px 14px;font-weight:600}
+.meta .r{color:#d00}.ttl{text-align:center;font-size:20px;font-weight:800;padding:4px}.ttl i{color:#2a2a9a;font-style:normal}
+.wrap{overflow:auto;max-height:70vh;padding:0 8px 8px}
+table.g{border-collapse:collapse;width:100%;font-size:15px}
+.g th,.g td{border:1px solid var(--line);padding:0;text-align:center;height:34px}
+.g th{font-weight:600}.g .v{height:150px;min-width:46px}.g .v div{writing-mode:vertical-rl;transform:rotate(180deg);margin:auto;white-space:nowrap;padding:4px}
+.g td.n{background:#fff;font-style:italic}.g td.nm{text-align:right;padding:0 8px;white-space:nowrap;background:#fff}
+.g td.n,.g th.n{position:sticky;right:0;min-width:44px;z-index:2}.g td.l,.g th.l{position:sticky;right:44px;z-index:2;min-width:110px}
+.g .f{position:sticky;right:154px;z-index:2;min-width:110px}
+.g th.n{background:#f1f1a8}.g th.l,.g th.f{background:#bfdff5}.g th.c{background:#dcefd8}.g th.s{background:#a9d57c}.g th.fr{background:#e3aaa7}.g th.t{background:#9ec4e8}.g th.m{background:#cfa9d0}
+.g td input{width:100%;min-width:46px;border:0;border-radius:0;text-align:center;background:transparent;color:#111;padding:4px 2px;min-height:34px;font-size:16px}
+.g td input:focus{outline:2px solid var(--teal);background:#fffbe0}.g td.bad input{background:#fcc}
+.g td.ro{font-weight:800}.g td.pass{color:#0a7a2f}.g td.fail{color:#c00}
+.st{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;padding:8px}
+.st div{border:1px solid var(--line);padding:6px 8px;display:flex;justify-content:space-between;gap:6px;font-weight:600}
+.st .a1{background:#fbe3ee}.st .a2{background:#a9d57c}.st .a3{background:#f4a29d}.st .a0{background:#bfdff5}
+.mut{color:var(--mut);font-size:14px}.cat{display:grid;grid-template-columns:2fr 80px 44px 44px;gap:6px;margin-bottom:6px}
+.hid{display:none}
+@media(max-width:600px){main{padding:8px}.band{font-size:16px}.g th.l,.g td.l{min-width:90px}.g .f{right:134px;min-width:90px}}
+@media print{@page{margin:8mm}body{background:#fff}header.top,.noprint,.card{display:none!important}main{max-width:none;padding:0}.sheet{border:0}.wrap{max-height:none;overflow:visible}.g td,.g th{position:static!important}.g td input{font-size:13px}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.pb{display:block!important}}
+.pb{display:none}.sheet::after{content:"";display:block;height:22px;background:linear-gradient(to left,var(--dark) 45%,var(--teal) 45%)}@media print{#stt{break-before:page}thead{display:table-header-group}tr{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="top"><b>دفتر التنقيط</b><span id="hs"></span><small id="sv" style="opacity:.8"></small><button class="g" style="color:#fff;border-color:#555" onclick="home()">الرئيسية</button><button id="ab" class="g hid" style="color:#fff;border-color:#555" onclick="adminView()">الإدارة</button><button class="g" style="color:#fff;border-color:#555" onclick="logout()">خروج</button></header>
+<main id="app"></main>
+<script>
+const K='dtq1',$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let S=null;const DEF=()=>({p:{season:'2026/2027',term:'1',type:'متوسطة'},cl:[]});let cur=null,sub=null,fs='',ft='',sa=0;
+let TK=localStorage.getItem('dtk'),ME=null,VER=0,tm=0,busy=false,again=false;
+const sv=x=>{const e=$('#sv');if(e)e.textContent=x};
+async function api(p,m='GET',b){const r=await fetch('/api'+p,{method:m,keepalive:m=='PUT',headers:{'Content-Type':'application/json',...(TK?{Authorization:'Bearer '+TK}:{})},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(j.error||'خطأ في الاتصال'),{status:r.status});return j}
+const save=()=>{if(!ME||ME.role!='teacher')return;sv('جارٍ الحفظ…');clearTimeout(tm);tm=setTimeout(push,500)};
+async function push(){tm=0;if(busy){again=true;return}busy=true;try{const r=await api('/data','PUT',{state:S,ver:VER});VER=r.ver;sv('تم الحفظ ✓')}catch(e){sv('فشل الحفظ');if(e.status==409||e.status==401){alert(e.message);location.reload()}else setTimeout(push,4000)}busy=false;if(again){again=false;push()}}
+addEventListener('visibilitychange',()=>{if(document.hidden&&tm){clearTimeout(tm);push()}});
+const TN={1:'الأول',2:'الثاني',3:'الثالث'};
+function home(){cur=null;render()}
+function render(){if(ME&&ME.role=='admin')return adminView();$('#hs').textContent=S.p.name?('الأستاذ: '+S.p.name):'';cur?classView():homeView()}
+function homeView(){
+const p=S.p,seasons=[...new Set(S.cl.map(c=>c.season))],f=S.cl.filter(c=>(!fs||c.season==fs)&&(!ft||c.term==ft)&&(!!c.ar==!!sa));
+$('#app').innerHTML=`<div class="card"><h2>بيانات الأستاذ</h2><div class="row">
+<input placeholder="الاسم واللقب" value="${esc(p.name)}" oninput="S.p.name=this.value;save()">
+<input placeholder="مديرية التربية" value="${esc(p.dir)}" oninput="S.p.dir=this.value;save()">
+<input placeholder="المؤسسة التربوية" value="${esc(p.school)}" oninput="S.p.school=this.value;save()">
+<select onchange="S.p.type=this.value;save()"><option ${p.type=='متوسطة'?'selected':''}>متوسطة</option><option ${p.type=='ثانوية'?'selected':''}>ثانوية</option></select>
+<input placeholder="الموسم 2026/2027" value="${esc(p.season)}" oninput="S.p.season=this.value;save()">
+<select onchange="S.p.term=this.value;save()">${[1,2,3].map(i=>`<option value="${i}" ${p.term==i?'selected':''}>الفصل ${TN[i]}</option>`).join('')}</select></div></div>
+<div class="card"><h2>الأقسام (${S.cl.length}) · التلاميذ: ${S.cl.reduce((a,c)=>a+c.st.length,0)}</h2>
+<div class="row"><select onchange="fs=this.value;render()"><option value="">كل المواسم (الأرشيف)</option>${seasons.map(s=>`<option ${s==fs?'selected':''}>${esc(s)}</option>`).join('')}</select>
+<select onchange="ft=this.value;render()"><option value="">كل الفصول</option>${[1,2,3].map(i=>`<option value="${i}" ${ft==i?'selected':''}>الفصل ${TN[i]}</option>`).join('')}</select>
+<select onchange="sa=+this.value;render()"><option value="0">الأقسام الحالية</option><option value="1" ${sa?'selected':''}>المؤرشفة</option></select><button class="fit" onclick="addClass()">+ قسم جديد</button></div><div style="margin-top:10px">
+${f.map(c=>`<div class="cls"><div><b>${esc(c.name)}</b><div class="mut">${esc(c.season)} · الفصل ${TN[c.term]} · ${c.st.length} تلميذ · ${c.sub.length} مادة</div></div>
+<div class="row"><button class="fit" onclick="openC('${c.id}')">فتح</button><button class="fit g" onclick="copyC('${c.id}')">نسخ</button><button class="fit g" onclick="renC('${c.id}')">تعديل</button><button class="fit g" onclick="arC('${c.id}')">${c.ar?'استرجاع':'أرشفة'}</button><button class="fit d" onclick="delC('${c.id}')">حذف</button></div></div>`).join('')||'<p class="mut">لا توجد أقسام. أنشئ قسمك الأول.</p>'}</div></div>
+<div class="card"><h2>نسخة احتياطية</h2><div class="row"><button class="fit g" onclick="bk()">تنزيل نسخة احتياطية</button><button class="fit g" onclick="$('#rf').click()">استرجاع نسخة</button><button class="fit g" onclick="snaps()">استرجاع من نسخ الخادم</button><input id="rf" type="file" class="hid" accept=".json" onchange="rs(this)"></div>
+<p class="mut">تُحفظ بياناتك تلقائياً في قاعدة البيانات على الخادم، مع نسخة يومية لآخر 14 يوماً.</p><details><summary>سجل التعديلات (آخر 50)</summary>${(S.log||[]).slice(-50).reverse().map(l=>`<div class="mut">${new Date(l.t).toLocaleString('ar-DZ')} · ${esc(l.a)}</div>`).join('')||'<div class="mut">لا توجد تعديلات.</div>'}</details></div>`}
+function addClass(){const n=prompt('اسم القسم (مثال: 4 متوسط 3)');if(!n)return;const c={id:uid(),name:n,season:S.p.season,term:S.p.term,sort:'orig',st:[],sub:[]};c.sub.push(newSub('المادة'));S.cl.push(c);save();openC(c.id)}
+function newSub(n){return{id:uid(),name:n,formula:'(cc+f+t*2)/4',cats:['الاستجواب الكتابي 01','الاستجواب الكتابي 02','الوظائف','الكراس','المشاركة والسلوك'].map(x=>({id:uid(),name:x,max:4,on:1})),m:{}}}
+function openC(id){cur=S.cl.find(c=>c.id==id);sub=cur.sub[0]?.id;render();scrollTo(0,0)}
+function arC(id){const c=S.cl.find(c=>c.id==id);c.ar=c.ar?0:1;save();render()}
+function mvSt(id){const o=S.cl.filter(c=>c!=cur&&!c.ar);if(!o.length)return alert('لا يوجد قسم آخر');const t=o[(+prompt('انقل إلى (أدخل الرقم):\n'+o.map((c,i)=>`${i+1}- ${c.name} (${c.season} ف${c.term})`).join('\n')))-1];if(!t)return;const s=cur.st.find(x=>x.id==id);if(!confirm('نقل '+s.ln+' '+s.fn+' إلى '+t.name+'؟ نقاطه في هذا القسم ستُحذف.'))return;t.st.push({...s,id:uid()});cur.st=cur.st.filter(x=>x.id!=id);cur.sub.forEach(b=>delete b.m[id]);save();render();studs()}
+function renC(id){const c=S.cl.find(c=>c.id==id),n=prompt('اسم القسم',c.name);if(n){c.name=n;save();render()}}
+function delC(id){if(confirm('حذف القسم وكل نقاطه نهائياً؟')){S.cl=S.cl.filter(c=>c.id!=id);save();render()}}
+function copyC(id){const c=S.cl.find(c=>c.id==id),s=prompt('الموسم الدراسي للنسخة',c.season);if(!s)return;const t=prompt('الفصل (1 أو 2 أو 3)',String(Math.min(3,+c.term+1)));if(!['1','2','3'].includes(t))return alert('فصل غير صحيح');
+const ids={},n={id:uid(),name:c.name,season:s,term:t,sort:c.sort,st:c.st.map(x=>{const y={...x,id:uid()};ids[x.id]=y.id;return y}),sub:c.sub.map(b=>({...JSON.parse(JSON.stringify(b)),id:uid(),m:{}}))};
+S.cl.push(n);save();alert('تم النسخ. القائمة والإعدادات نُسخت والنقاط فارغة، والقسم الأصلي لم يتغير.');render()}
+function bk(){S.lb=Date.now();save();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='dafter-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click()}
+function rs(i){const f=i.files[0];if(!f)return;f.text().then(t=>{try{const d=JSON.parse(t);if(!d.cl)throw 0;if(confirm('استبدال البيانات الحالية بالنسخة المحددة؟')){S=d;save();render()}}catch(e){alert('ملف غير صالح')}})}
+const B=()=>cur.sub.find(s=>s.id==sub);
+const ord=()=>cur.sort=='alpha'?[...cur.st].sort((a,b)=>(a.ln+' '+a.fn).localeCompare(b.ln+' '+b.fn,'ar')):cur.st;
+const num=v=>{if(v===''||v==null)return null;const n=parseFloat(String(v).replace(',','.'));return isNaN(n)?null:n};
+function calc(b,id){const m=b.m[id]||{},cs=b.cats.filter(c=>c.on),vs=cs.map(c=>num(m.c?.[c.id])).filter(v=>v!=null),cc=vs.length?vs.reduce((a,x)=>a+x,0):null,f=num(m.f),t=num(m.t);let av=null;
+if(cc!=null&&f!=null&&t!=null){try{const e=b.formula.replace(/cc/g,cc).replace(/f/g,f).replace(/t/g,t);if(/^[\d+\-*\/().\s]+$/.test(e))av=Math.round(Function('return '+e)()*100)/100}catch(x){}}return{cc,f,t,av}}
+const fm=v=>v==null?'':(+v.toFixed(2)).toString();
+function classView(){const b=B(),c=cur;
+$('#app').innerHTML=`<div class="card noprint"><div class="tabs">${c.sub.map(s=>`<button class="${s.id==sub?'on':''}" onclick="sub='${s.id}';render()">${esc(s.name)}</button>`).join('')}<button class="g" onclick="addSub()">+ مادة</button></div>
+<div class="row"><button class="fit g" onclick="setup()">إعدادات المادة والتقويم</button><button class="fit g" onclick="studs()">التلاميذ</button>
+<select class="fit" onchange="cur.sort=this.value;save();render()"><option value="orig" ${c.sort=='orig'?'selected':''}>الترتيب الأصلي</option><option value="alpha" ${c.sort=='alpha'?'selected':''}>أبجدي (لقب ثم اسم)</option></select>
+<select class="fit" id="or" onchange="orient()"><option value="portrait">A4 عمودي</option><option value="landscape">A4 أفقي</option></select>
+<select class="fit" onchange="document.querySelector('.wrap').style.zoom=this.value"><option value="1">تكبير 100%</option><option value="0.8">80%</option><option value="1.2">120%</option><option value="1.5">150%</option></select><button class="fit g" onclick="document.querySelector('.sheet').requestFullscreen&&document.querySelector('.sheet').requestFullscreen()">ملء الشاشة</button><button class="fit" onclick="print()">طباعة / PDF</button><button class="fit g" onclick="xp()">تصدير Excel</button><button class="fit g" onclick="$('#xf').click()">استيراد نقاط Excel</button><input id="xf" type="file" class="hid" accept=".xlsx,.xls,.csv" onchange="xm(this)"></div><div id="pn"></div></div>
+${b?sheet(b):'<p>أضف مادة.</p>'}`;stats()}
+function sheet(b){const c=cur,cs=b.cats.filter(x=>x.on),p=S.p;
+return`<div class="sheet"><div class="band"><div class="b">دفتر التنقيط</div><div class="a">قسم ${esc(c.name)}</div></div>
+<div class="meta"><div>مديرية التربية ${esc(p.dir)}<br>${esc(p.type)} ${esc(p.school)}</div><div>الأستاذ: <span class="r">${esc(p.name)}</span><br>الموسم الدراسي: ${esc(c.season)} · ${esc(b.name)}</div></div>
+<div class="ttl">دفتر التقويم للفصل <i>${TN[c.term]}</i> – القسم : <i>${esc(c.name)}</i></div>
+<div class="wrap"><table class="g"><thead><tr><th colspan="3" style="border:0;background:none"></th><th colspan="${cs.length}" style="background:#dcefd8">المراقبة المستمرة</th><th colspan="4" style="border:0"></th></tr>
+<tr><th class="n v"><div>الرقم</div></th><th class="l v"><div>اللقب</div></th><th class="f v"><div>الاسم</div></th>${cs.map(x=>`<th class="c v"><div>${esc(x.name)} (${x.max} ن)</div></th>`).join('')}<th class="s v"><div>المجموع</div></th><th class="fr v"><div>الفرض</div></th><th class="t v"><div>الاختبار</div></th><th class="m v"><div>المعدل الفصلي للمادة</div></th></tr></thead>
+<tbody>${ord().map((s,i)=>{const m=b.m[s.id]||{};return`<tr><td class="n">${String(i+1).padStart(2,'0')}</td><td class="nm l">${esc(s.ln)}</td><td class="nm f">${esc(s.fn)}</td>${cs.map(x=>cell(s.id,x.id,m.c?.[x.id])).join('')}<td class="ro" id="cc_${s.id}"></td>${cell(s.id,'f',m.f)}${cell(s.id,'t',m.t)}<td class="ro" id="av_${s.id}"></td></tr>`}).join('')}</tbody></table></div>
+<div id="stt"></div></div>`}
+const cell=(id,k,v)=>`<td id="td_${id}_${k}"><input inputmode="decimal" maxlength="5" data-k="${k}" value="${esc(v??'')}" oninput="inp('${id}','${k}',this)" onkeydown="kd(event,this)" aria-label="علامة"></td>`;
+const lg=a=>{(S.log=S.log||[]).push({t:Date.now(),a});if(S.log.length>500)S.log.shift()};
+function inp(id,k,el){const b=B();let v=el.value.replace(',','.').replace(/[^\d.]/g,'');const mx=k=='f'||k=='t'?20:b.cats.find(c=>c.id==k).max,n=parseFloat(v);
+el.parentNode.classList.toggle('bad',!isNaN(n)&&n>mx);if(!isNaN(n)&&n>mx){el.value=el.dataset.old||'';return alert('العلامة القصوى: '+mx)}
+el.value=v;el.dataset.old=v;const m=b.m[id]=b.m[id]||{c:{}};m.c=m.c||{};if(k=='f'||k=='t')m[k]=v;else m.c[k]=v;lg(cur.name+' / '+b.name+': '+cur.st.find(s=>s.id==id).ln+' ['+k.slice(0,3)+'] = '+v);save();row(b,id);stats()}
+function row(b,id){const r=calc(b,id),a=$('#av_'+id);$('#cc_'+id).textContent=fm(r.cc);a.textContent=fm(r.av);a.className='ro '+(r.av==null?'':r.av>=10?'pass':'fail')}
+function kd(e,el){if(e.key=='Enter'){e.preventDefault();const l=[...document.querySelectorAll(`input[data-k="${el.dataset.k}"]`)],i=l.indexOf(el);(l[i+1]||l[0]).focus();(l[i+1]||l[0]).select()}}
+function stats(){const b=B();if(!b)return;const ids=cur.st.map(s=>s.id);ids.forEach(i=>row(b,i));const a=ids.map(i=>calc(b,i).av).filter(v=>v!=null),n=a.length,ps=a.filter(v=>v>=10).length,R=[[16,21,'من 16 إلى 20'],[12,16,'من 12 إلى أقل من 16'],[10,12,'من 10 إلى أقل من 12'],[7,10,'من 7 إلى أقل من 10'],[5,7,'من 5 إلى أقل من 7'],[0,5,'من 0 إلى أقل من 5']];
+const e=$('#stt');if(!e)return;e.innerHTML=`<div class="st"><div class="a0"><span>عدد التلاميذ</span><span>${ids.length}</span></div><div class="a0"><span>المنقّطون</span><span>${n}</span></div><div class="a1"><span>الناجحون (≥10)</span><span>${ps}</span></div><div class="a1"><span>نسبة النجاح</span><span>${n?(ps/n*100).toFixed(1)+'%':'—'}</span></div><div class="a0"><span>معدل القسم</span><span>${n?fm(a.reduce((x,y)=>x+y,0)/n):'—'}</span></div><div class="a2"><span>أكبر علامة</span><span>${n?fm(Math.max(...a)):'—'}</span></div><div class="a3"><span>أدنى علامة</span><span>${n?fm(Math.min(...a)):'—'}</span></div>
+${R.map(r=>`<div><span>${r[2]}</span><span>${a.filter(v=>v>=r[0]&&v<r[1]).length}</span></div>`).join('')}</div>`}
+function addSub(){const n=prompt('اسم المادة');if(!n)return;const s=newSub(n);cur.sub.push(s);sub=s.id;save();render()}
+function orient(){let s=$('#ps');if(!s){s=document.createElement('style');s.id='ps';document.head.appendChild(s)}s.textContent='@media print{@page{size:A4 '+$('#or').value+'}}'}
+function setup(){const b=B(),tot=b.cats.filter(x=>x.on).reduce((a,x)=>a+(+x.max||0),0);
+$('#pn').innerHTML=`<div style="border-top:1px solid var(--bd);margin-top:10px;padding-top:10px"><div class="row"><input value="${esc(b.name)}" onchange="B().name=this.value;save();render()"><button class="fit d" onclick="delSub()">حذف المادة</button></div>
+<p class="mut">فئات التقويم المستمر (المجموع ${tot} من 20 كحد أقصى):</p>${b.cats.map((x,i)=>`<div class="cat"><input value="${esc(x.name)}" onchange="B().cats[${i}].name=this.value;save();render();setup()"><input type="number" min="0.5" step="0.5" value="${x.max}" onchange="chg(${i},this.value)"><button class="g" title="تعطيل" onclick="B().cats[${i}].on=B().cats[${i}].on?0:1;save();render();setup()">${x.on?'●':'○'}</button><button class="d" onclick="B().cats.splice(${i},1);save();render();setup()">×</button></div>`).join('')}
+<button class="g" onclick="B().cats.push({id:uid(),name:'فئة جديدة',max:4,on:1});save();render();setup()">+ فئة</button>
+<p class="mut" style="margin-top:10px">معادلة المعدل (cc = مجموع المراقبة، f = الفرض، t = الاختبار):</p><input dir="ltr" value="${esc(b.formula)}" onchange="fx(this.value)"></div>`}
+function chg(i,v){const b=B();const old=b.cats[i].max;b.cats[i].max=+v;if(b.cats.filter(x=>x.on).reduce((a,x)=>a+x.max,0)>20){b.cats[i].max=old;alert('مجموع التقويم المستمر لا يتجاوز 20')}save();render();setup()}
+function fx(v){if(!/^[ccft\d+\-*\/().\s]+$/.test(v))return alert('معادلة غير صالحة');B().formula=v;save();render();setup()}
+function delSub(){if(confirm('حذف المادة ونقاطها؟')){cur.sub=cur.sub.filter(s=>s.id!=sub);sub=cur.sub[0]?.id;save();render()}}
+function studs(){$('#pn').innerHTML=`<div style="border-top:1px solid var(--bd);margin-top:10px;padding-top:10px"><div class="row"><input id="sl" placeholder="اللقب"><input id="sf" placeholder="الاسم"><button class="fit" onclick="addSt()">+ إضافة</button></div>
+<div class="row" style="margin-top:8px"><button class="fit g" onclick="$('#sx').click()">استيراد قائمة من Excel</button><input id="sx" type="file" class="hid" accept=".xlsx,.xls,.csv" onchange="xs(this)"></div>
+<p class="mut">الاستيراد يحافظ على الترتيب حرفياً: العمود الأول لقب والثاني اسم.</p>
+${cur.st.map(s=>`<div class="cls" style="padding:4px 10px"><span>${esc(s.ln)} ${esc(s.fn)} <small class="mut">${esc([s.bd,s.g,s.r].filter(Boolean).join(' · '))}</small></span><span><button class="g" onclick="edSt('${s.id}')">تعديل</button> <button class="g" onclick="mvSt('${s.id}')">نقل</button> <button class="d" onclick="dlSt('${s.id}')">حذف</button></span></div>`).join('')}</div>`}
+function addSt(){const l=$('#sl').value.trim(),f=$('#sf').value.trim();if(!l||!f)return alert('اللقب والاسم إلزاميان');if(cur.st.some(s=>s.ln==l&&s.fn==f)&&!confirm('اسم مطابق موجود. إضافته مرة أخرى؟'))return;cur.st.push({id:uid(),ln:l,fn:f});save();render();studs()}
+function edSt(id){const s=cur.st.find(x=>x.id==id),l=prompt('اللقب',s.ln),f=l&&prompt('الاسم',s.fn);if(l&&f){const o=prompt('اختياري: تاريخ الميلاد | الجنس | رقم التسجيل | ملاحظة',[s.bd,s.g,s.r,s.nt].map(x=>x||'').join(' | '));s.ln=l;s.fn=f;if(o!=null){const a=o.split('|').map(x=>x.trim());s.bd=a[0];s.g=a[1];s.r=a[2];s.nt=a[3]}save();render();studs()}}
+function dlSt(id){if(confirm('حذف التلميذ ونقاطه؟')){lg('حذف تلميذ من '+cur.name);cur.st=cur.st.filter(s=>s.id!=id);cur.sub.forEach(b=>delete b.m[id]);save();render();studs()}}
+const rd=(f,cb)=>{const r=new FileReader();r.onload=e=>cb(XLSX.utils.sheet_to_json(XLSX.read(e.target.result,{type:'array'}).Sheets[XLSX.read(e.target.result,{type:'array'}).SheetNames[0]],{header:1,defval:''}));r.readAsArrayBuffer(f)};
+function xs(i){const f=i.files[0];if(!f)return;rd(f,rows=>{let r=rows.filter(x=>String(x[0]).trim()||String(x[1]).trim());if(r[0]&&/لقب/.test(r[0][0]))r=r.slice(1);r=r.filter(x=>!/^\d+$/.test(String(x[0]).trim())||String(x[1]).trim());const ok=r.filter(x=>String(x[0]).trim()&&String(x[1]).trim()),nw=[];let dup=0;ok.forEach(x=>{const l=String(x[0]).trim(),n=String(x[1]).trim();if(cur.st.some(s=>s.ln==l&&s.fn==n)||nw.some(s=>s.ln==l&&s.fn==n))dup++;else nw.push({id:uid(),ln:l,fn:n})});
+if(confirm(`سيتم استيراد ${nw.length} تلميذ (تخطي ${dup} مكرر، ${r.length-ok.length} صف ناقص). المعاينة: ${nw.slice(0,3).map(s=>s.ln+' '+s.fn).join('، ')}…`)){cur.st.push(...nw);save();render();studs()}});i.value=''}
+function xp(){const b=B(),cs=b.cats.filter(x=>x.on),h=['المعرف','اللقب','الاسم',...cs.map(x=>x.name+' /'+x.max),'المجموع','الفرض','الاختبار','المعدل'];
+const d=[h,...ord().map(s=>{const m=b.m[s.id]||{},r=calc(b,s.id);return[s.id,s.ln,s.fn,...cs.map(x=>num(m.c?.[x.id])??''),r.cc??'',r.f??'',r.t??'',r.av??'']})];
+const w=XLSX.utils.book_new();XLSX.utils.book_append_sheet(w,XLSX.utils.aoa_to_sheet(d),'النقاط');XLSX.writeFile(w,`${cur.name}-${b.name}.xlsx`)}
+function xm(i){const f=i.files[0];if(!f)return;const b=B(),cs=b.cats.filter(x=>x.on);rd(f,rows=>{const ch=[];rows.slice(1).forEach(x=>{const s=cur.st.find(s=>s.id==x[0]);if(!s)return;const m=b.m[s.id]||{c:{}},nm={c:{...m.c}};let d=0;
+cs.forEach((c,j)=>{const v=num(x[3+j]);if(v!=null&&v<=c.max&&String(v)!=String(m.c?.[c.id]??'')){nm.c[c.id]=String(v);d++}});const o=3+cs.length;[['f',o+1],['t',o+2]].forEach(([k,j])=>{const v=num(x[j]);if(v!=null&&v<=20&&String(v)!=String(m[k]??'')){nm[k]=String(v);d++}});if(d)ch.push([s,nm,d])});
+if(!ch.length)return alert('لا توجد تغييرات (تأكد أن عمود المعرف غير معدّل).');if(confirm(`تحديث ${ch.reduce((a,x)=>a+x[2],0)} علامة لـ ${ch.length} تلميذ؟ مثال: ${ch[0][0].ln} ${ch[0][0].fn}`)){ch.forEach(([s,nm])=>b.m[s.id]={...b.m[s.id],...nm,c:nm.c});save();render()}});i.value=''}
+function loginView(){$('#hs').textContent='';sv('');$('#ab').classList.add('hid');$('#app').innerHTML=`<div class="card" style="max-width:420px;margin:40px auto"><h2>تسجيل الدخول</h2><div class="row"><input id="lu" placeholder="اسم المستخدم" autocomplete="username"><input id="lp" type="password" placeholder="كلمة المرور" autocomplete="current-password" onkeydown="if(event.key=='Enter')login()"><button class="fit" onclick="login()">دخول</button></div><p id="le" style="color:#d33"></p></div>`}
+async function login(){try{const r=await api('/login','POST',{username:$('#lu').value,password:$('#lp').value});TK=r.token;localStorage.setItem('dtk',TK);boot()}catch(e){$('#le').textContent=e.message}}
+async function logout(){if(tm)await push();localStorage.removeItem('dtk');TK=null;ME=null;S=null;cur=null;loginView()}
+async function boot(){if(!TK)return loginView();try{ME=(await api('/me')).user}catch(e){return logout()}
+$('#ab').classList.toggle('hid',ME.role!='admin');$('#hs').textContent=ME.name||ME.username;if(ME.role=='admin')return adminView();
+try{const d=await api('/data');S=d.state||null;VER=d.ver||0;if(!S){let o=null;try{o=JSON.parse(localStorage.getItem(K)||'null')}catch(e){}
+S=(o&&o.cl&&confirm('وُجدت بيانات محفوظة على هذا الجهاز. هل تريد رفعها إلى حسابك؟'))?o:DEF();S.p.name=S.p.name||ME.name;save()}render()}catch(e){alert(e.message)}}
+async function snaps(){try{const l=(await api('/snapshots')).list;if(!l.length)return alert('لا توجد نسخ بعد');const k=+prompt('اختر رقم النسخة:\n'+l.map((x,i)=>`${i+1}- ${new Date(x.at).toLocaleString('ar-DZ')}`).join('\n'));const x=l[k-1];if(!x||!confirm('استبدال البيانات الحالية بهذه النسخة؟'))return;await api('/snapshots/'+x.id,'POST');location.reload()}catch(e){alert(e.message)}}
+async function adminView(){$('#hs').textContent='لوحة الإدارة';let us=[];try{us=(await api('/users')).users}catch(e){return alert(e.message)}
+$('#app').innerHTML=`<div class="card"><h2>الحسابات (${us.length})</h2><div class="row"><button class="fit" onclick="newU()">+ حساب أستاذ</button></div><div style="margin-top:10px">${us.map(u=>`<div class="cls"><div><b>${esc(u.name||'')}</b> <span class="mut">@${esc(u.username)} · ${u.role=='admin'?'إدارة':'أستاذ'} · ${u.active?'مفعّل':'معطّل'}</span></div><div class="row"><button class="fit g" onclick="edU('${u.id}','name')">تعديل الاسم</button><button class="fit g" onclick="edU('${u.id}','password')">كلمة مرور جديدة</button><button class="fit g" onclick="edU('${u.id}','active')">${u.active?'تعطيل':'تفعيل'}</button>${u.role=='teacher'?`<button class="fit d" onclick="delU('${u.id}')">حذف</button>`:''}</div></div>`).join('')}</div></div>`}
+async function newU(){const username=prompt('اسم المستخدم');if(!username)return;const password=prompt('كلمة المرور (8 أحرف على الأقل)');if(!password)return;const name=prompt('الاسم واللقب')||'';try{await api('/users','POST',{username,password,name});adminView()}catch(e){alert(e.message)}}
+async function edU(id,k){const b={};if(k=='name'){b.name=prompt('الاسم الجديد');if(!b.name)return}else if(k=='password'){b.password=prompt('كلمة المرور الجديدة (8 أحرف على الأقل)');if(!b.password)return}else b.toggle=1;try{await api('/users/'+id,'PATCH',b);adminView()}catch(e){alert(e.message)}}
+async function delU(id){if(!confirm('حذف الحساب وكل بياناته نهائياً؟'))return;try{await api('/users/'+id,'DELETE');adminView()}catch(e){alert(e.message)}}
+boot();
+</script>
+</body>
+</html>
