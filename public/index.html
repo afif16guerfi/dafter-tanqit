@@ -108,14 +108,18 @@ html[data-ut=glass] #um .box{background:var(--bg)}
 .pb{display:none}
 /* لوحة الإحصائيات المتخصصة */
 .nsn{padding:0 14px;color:#556;font-size:13px;font-weight:600}
-.nsk{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;padding:8px 14px}
+.nsk{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;padding:8px 14px}
 .nsk div{border:1px solid #d5dde0;border-top:4px solid var(--pp);border-radius:8px;padding:8px 10px;background:#fff;color:#111;display:flex;flex-direction:column;gap:2px}
 .nsk div span{font-size:13px;color:#556}.nsk div b{font-size:22px}
 .nsk .ok2{border-top-color:#43a982}.nsk .no2{border-top-color:#d64545}
-.nsch{margin:8px 14px;padding:10px;border:1px solid #d5dde0;border-radius:8px;break-inside:avoid}.nsch h4{margin:0 0 6px}.nsch svg{width:100%;max-width:520px;display:block;margin:0 auto}
-.nst{width:calc(100% - 28px);margin:8px 14px 14px;border-collapse:collapse;font-size:14px}.nst th,.nst td{border:1px solid #d5dde0;padding:6px 10px;text-align:start}.nst th{background:var(--hn);color:#111}
+.nsg{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;padding:8px 14px 14px;align-items:start}
+@media(max-width:900px){.nsg{grid-template-columns:minmax(0,1fr)}}
+.nsch{padding:10px;border:1px solid #d5dde0;border-radius:8px;break-inside:avoid;min-width:0}.nsch h4{margin:0 0 6px;font-size:17px}
+.nsc,.nsw{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}.nsc svg{display:block;width:100%;min-width:560px;height:auto}
+.nsc .lg{min-width:0;flex-wrap:wrap}
+.nst{width:100%;min-width:420px;border-collapse:collapse;font-size:15px}.nst th,.nst td{border:1px solid #d5dde0;padding:6px 10px;text-align:start}.nst th{background:var(--hn);color:#111}
 .nst td i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-inline-end:8px;vertical-align:middle}.nst td:last-child{width:30%}.nst u{display:block;height:10px;border-radius:5px}
-@media print{.nsx+.nsx{break-before:page}}
+@media print{.nsx+.nsx{break-before:page}.nsc,.nsw{overflow:visible}.nsc svg{min-width:0}.nst{min-width:0}.nsg{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -132,7 +136,7 @@ async function push(){tm=0;if(busy){again=true;return}busy=true;try{const r=awai
 addEventListener('visibilitychange',()=>{if(document.hidden&&tm){clearTimeout(tm);push()}});
 const TN={1:'الأول',2:'الثاني',3:'الثالث'};
 function home(){cur=null;nsOn=false;render()}
-function render(){if(ME&&ME.role=='admin')return adminView();$('#hs').textContent=S.p.name?('الأستاذ: '+S.p.name):'';cur?(nsOn?nsView():classView()):homeView()}
+function render(){$('#app').style.maxWidth=(cur&&nsOn&&!(ME&&ME.role=='admin'))?'1600px':'';if(ME&&ME.role=='admin')return adminView();$('#hs').textContent=S.p.name?('الأستاذ: '+S.p.name):'';cur?(nsOn?nsView():classView()):homeView()}
 function homeView(){
 const p=S.p,seasons=[...new Set(S.cl.map(c=>c.season))],f=S.cl.filter(c=>(!fs||c.season==fs)&&(!ft||c.term==ft)&&(!!c.ar==!!sa));
 $('#app').innerHTML=`<div class="card"><h2>بيانات الأستاذ</h2><div class="row">
@@ -169,8 +173,9 @@ function rs(i){const f=i.files[0];if(!f)return;f.text().then(t=>{try{const d=JSO
 const B=()=>cur.sub.find(s=>s.id==sub);
 const ord=()=>cur.sort=='alpha'?[...cur.st].sort((a,b)=>(a.ln+' '+a.fn).localeCompare(b.ln+' '+b.fn,'ar')):cur.st;
 const num=v=>{if(v===''||v==null)return null;const n=parseFloat(String(v).replace(',','.'));return isNaN(n)?null:n};
-function calc(b,id){const m=b.m[id]||{},cs=b.cats.filter(c=>c.on),vs=cs.map(c=>num(m.c?.[c.id])).filter(v=>v!=null),cc=vs.length?vs.reduce((a,x)=>a+x,0):null,f=num(m.f),t=num(m.t);let av=null;
-if(cc!=null||f!=null||t!=null){try{const V={cc:cc??0,f:f??0,t:t??0},e=String(b.formula).replace(/cc|f|t/g,k=>'('+V[k]+')');if(/^[\d+\-*\/().\s]+$/.test(e)){const r=Function('return '+e)();if(isFinite(r))av=Math.round(r*100)/100}}catch(x){}}return{cc,f,t,av}}
+const r2=v=>Math.round(+(v*100).toPrecision(12))/100,fa=v=>{if(v==null||isNaN(v)||r2(v)==0)return'00.0';const t=r2(v).toFixed(2);return t.endsWith('0')?t.slice(0,-1):t};
+function calc(b,id){const m=b.m[id]||{},cs=b.cats.filter(c=>c.on),vs=cs.map(c=>num(m.c?.[c.id])).filter(v=>v!=null),cc=vs.length?r2(vs.reduce((a,x)=>a+x,0)):null,f=num(m.f),t=num(m.t);let av=null;
+if(cc!=null||f!=null||t!=null){try{const V={cc:cc??0,f:f??0,t:t??0},e=String(b.formula).replace(/cc|f|t/g,k=>'('+V[k]+')');if(/^[\d+\-*\/().\s]+$/.test(e)){const r=Function('return '+e)();if(isFinite(r))av=r2(r)}}catch(x){}}return{cc,f,t,av}}
 const fm=v=>v==null?'':(+v.toFixed(2)).toString();
 function classView(){const b=B(),c=cur;
 $('#app').innerHTML=`<div class="card noprint">${c.sub.length>1?`<div class="tabs">${c.sub.map(s=>`<button class="${s.id==sub?'on':''}" onclick="sub='${s.id}';render()">${esc(s.name)}</button>`).join('')}</div>`:''}
@@ -192,10 +197,10 @@ const lg=a=>{(S.log=S.log||[]).push({t:Date.now(),a});if(S.log.length>500)S.log.
 function inp(id,k,el){const b=B();let v=el.value.replace(',','.').replace(/[^\d.]/g,'');const mx=k=='f'||k=='t'?20:b.cats.find(c=>c.id==k).max,n=parseFloat(v);
 el.parentNode.classList.toggle('bad',!isNaN(n)&&n>mx);if(!isNaN(n)&&n>mx){el.value=el.dataset.old||'';return alert('العلامة القصوى: '+mx)}
 el.value=v;el.dataset.old=v;const m=b.m[id]=b.m[id]||{c:{}};m.c=m.c||{};if(k=='f'||k=='t')m[k]=v;else m.c[k]=v;lg(cur.name+' / '+b.name+': '+cur.st.find(s=>s.id==id).ln+' ['+k.slice(0,3)+'] = '+v);save();row(b,id);stats()}
-function row(b,id){const r=calc(b,id),a=$('#av_'+id);$('#cc_'+id).textContent=fm(r.cc);a.textContent=r.av==null?'00.0':fm(r.av);a.className='ro '+(r.av==null?'':r.av>=10?'pass':'fail')}
+function row(b,id){const r=calc(b,id),a=$('#av_'+id);$('#cc_'+id).textContent=fm(r.cc);a.textContent=fa(r.av);a.className='ro '+(r.av==null?'':r.av>=10?'pass':'fail')}
 function kd(e,el){if(e.key=='Enter'){e.preventDefault();const l=[...document.querySelectorAll(`input[data-k="${el.dataset.k}"]`)],i=l.indexOf(el);(l[i+1]||l[0]).focus();(l[i+1]||l[0]).select()}}
 function stats(fc){const b=B();if(!b)return;const ids=cur.st.map(s=>s.id);ids.forEach(i=>row(b,i));const d=sdata(b,cur),a=d.rows.map(x=>x.av),n=d.n,ps=d.ps,R=[[16,21,'من 16 إلى 20'],[12,16,'من 12 إلى أقل من 16'],[10,12,'من 10 إلى أقل من 12'],[7,10,'من 7 إلى أقل من 10'],[5,7,'من 5 إلى أقل من 7'],[0,5,'من 0 إلى أقل من 5']];
-const e=$('#kp');if(!e)return;e.innerHTML=pdfCfg().kp?`<div class="st"><div class="a0"><span>عدد التلاميذ</span><span>${ids.length}</span></div><div class="a0"><span>المنقّطون</span><span>${n}</span></div><div class="a1"><span>الناجحون (≥10)</span><span>${ps}</span></div><div class="a1"><span>نسبة النجاح</span><span>${n?(ps/n*100).toFixed(1)+'%':'—'}</span></div><div class="a3"><span>غير الناجحين (&lt;10)</span><span>${n-ps}</span></div><div class="a3"><span>نسبة غير الناجحين</span><span>${n?((n-ps)/n*100).toFixed(1)+'%':'—'}</span></div><div class="a0"><span>معدل القسم</span><span>${n?fm(a.reduce((x,y)=>x+y,0)/n):'—'}</span></div><div class="a2"><span>أكبر علامة</span><span>${n?fm(Math.max(...a)):'—'}</span></div><div class="a3"><span>أدنى علامة</span><span>${n?fm(Math.min(...a)):'—'}</span></div>
+const e=$('#kp');if(!e)return;e.innerHTML=pdfCfg().kp?`<div class="st"><div class="a0"><span>عدد التلاميذ</span><span>${ids.length}</span></div><div class="a0"><span>المنقّطون</span><span>${n}</span></div><div class="a1"><span>الناجحون (≥10)</span><span>${ps}</span></div><div class="a1"><span>نسبة النجاح</span><span>${n?(ps/n*100).toFixed(1)+'%':'—'}</span></div><div class="a3"><span>غير الناجحين (&lt;10)</span><span>${n-ps}</span></div><div class="a3"><span>نسبة غير الناجحين</span><span>${n?((n-ps)/n*100).toFixed(1)+'%':'—'}</span></div><div class="a0"><span>معدل القسم</span><span>${n?fa(a.reduce((x,y)=>x+y,0)/n):'—'}</span></div><div class="a2"><span>أكبر علامة</span><span>${n?fa(Math.max(...a)):'—'}</span></div><div class="a3"><span>أدنى علامة</span><span>${n?fa(Math.min(...a)):'—'}</span></div>
 ${R.map(r=>`<div><span>${r[2]}</span><span>${a.filter(v=>v>=r[0]&&v<r[1]).length}</span></div>`).join('')}</div>`:'';
 clearTimeout(ctm);const f=()=>{const x=$('#chs'),bb=B();if(x&&bb)x.innerHTML=chartsHTML(bb)};fc?f():ctm=setTimeout(f,160)}
 function orient(){let s=$('#ps');if(!s){s=document.createElement('style');s.id='ps';document.head.appendChild(s)}s.textContent='@media print{@page{size:A4 '+$('#or').value+'}}'}
@@ -245,8 +250,8 @@ ${add?`<div class="sheet" style="margin-top:8px"><div class="wrap" style="max-he
 <div class="row" style="margin-top:8px"><button class="fit" ${add?'':'disabled'} onclick="impOk()">تأكيد استيراد ${add}</button><button class="fit g" onclick="IM=null;$('#ip').innerHTML=''">إلغاء</button></div></div>`});i.value=''}
 function impOk(){if(!IM)return;let k=0;IM.items.forEach(e=>{let t=e.t;if(t.nw){t={id:uid(),name:t.name,season:S.p.season,term:S.p.term,sort:'orig',st:[],sub:[newSub(curSubj())]};S.cl.push(t)}e.st.forEach(s=>{t.st.push({id:uid(),...s});k++});lg('استيراد '+e.st.length+' تلميذ إلى '+t.name)});IM=null;save();render();if(cur)studs();alert('تم استيراد '+k+' تلميذ')}
 function xp(){const b=B(),cs=b.cats.filter(x=>x.on),h=['المعرف','اللقب','الاسم',...cs.map(x=>x.name+' /'+x.max),'المجموع','الفرض','الاختبار','المعدل'];
-const d=[h,...ord().map(s=>{const m=b.m[s.id]||{},r=calc(b,s.id);return[s.id,s.ln,s.fn,...cs.map(x=>num(m.c?.[x.id])??''),r.cc??'',r.f??'',r.t??'',r.av??'']})];
-const w=XLSX.utils.book_new();XLSX.utils.book_append_sheet(w,XLSX.utils.aoa_to_sheet(d),'النقاط');XLSX.writeFile(w,`${cur.name}-${b.name}.xlsx`)}
+const d=[h,...ord().map(s=>{const m=b.m[s.id]||{},r=calc(b,s.id);return[s.id,s.ln,s.fn,...cs.map(x=>num(m.c?.[x.id])??''),r.cc??'',r.f??'',r.t??'',r.av==null?'00.0':r.av]})];
+const w=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(d);d.forEach((r,i)=>{if(i&&typeof r[r.length-1]=='number'){const a=XLSX.utils.encode_cell({r:i,c:r.length-1});if(ws[a])ws[a].z='0.0#'}});XLSX.utils.book_append_sheet(w,ws,'النقاط');XLSX.writeFile(w,`${cur.name}-${b.name}.xlsx`)}
 function xm(i){const f=i.files[0];if(!f)return;const b=B(),cs=b.cats.filter(x=>x.on);rd(f,rows=>{const ch=[];rows.slice(1).forEach(x=>{const s=cur.st.find(s=>s.id==x[0]);if(!s)return;const m=b.m[s.id]||{c:{}},nm={c:{...m.c}};let d=0;
 cs.forEach((c,j)=>{const v=num(x[3+j]);if(v!=null&&v<=c.max&&String(v)!=String(m.c?.[c.id]??'')){nm.c[c.id]=String(v);d++}});const o=3+cs.length;[['f',o+1],['t',o+2]].forEach(([k,j])=>{const v=num(x[j]);if(v!=null&&v<=20&&String(v)!=String(m[k]??'')){nm[k]=String(v);d++}});if(d)ch.push([s,nm,d])});
 if(!ch.length)return alert('لا توجد تغييرات (تأكد أن عمود المعرف غير معدّل).');if(confirm(`تحديث ${ch.reduce((a,x)=>a+x[2],0)} علامة لـ ${ch.length} تلميذ؟ مثال: ${ch[0][0].ln} ${ch[0][0].fn}`)){ch.forEach(([s,nm])=>b.m[s.id]={...b.m[s.id],...nm,c:nm.c});save();render()}});i.value=''}
@@ -371,7 +376,7 @@ if(nz.length==1){const x=nz[0];s+=ri?`<circle cx="${cx}" cy="${cy}" r="${rm}" fi
 else nz.forEach(x=>{const fr=x.v/tot,a1=a+fr*Math.PI*2;s+=`<path d="${arc(cx,cy,r,ri,a,a1)}" fill="${x.c}" stroke="#fff" stroke-width="2"/>`+lab(x,(a+a1)/2,fr);a=a1});
 if(ri&&mid!=null)s+=tx(cx,cy-2,'المعدل',{s:12,f:'#667'})+tx(cx,cy+22,mid,{s:26,w:800});return svg(H,s)}
 function pieC(d){const sl=[{n:'ناجحون',v:d.ps,c:'#43a982'},{n:'غير ناجحين',v:d.fl,c:'#d64545'}];return ring(sl,0)+lgd(sl.map(x=>[x.c,`${x.n}: <bdi dir="ltr">${x.v} (${pcs(x.v,d.n)})</bdi>`]))}
-function doughC(d){const sl=RS.map((r,i)=>({n:r[2],v:d.dist[i],c:CC[i]}));return ring(sl,58,fm(d.avg))+lgd(sl.map(x=>[x.c,`<bdi dir="ltr">${x.n}: ${x.v}</bdi>`]))}
+function doughC(d){const sl=RS.map((r,i)=>({n:r[2],v:d.dist[i],c:CC[i]}));return ring(sl,58,fa(d.avg))+lgd(sl.map(x=>[x.c,`<bdi dir="ltr">${x.n}: ${x.v}</bdi>`]))}
 function stackC(d){const sx=r=>r.g!='ذكر'&&r.g!='أنثى',hg=d.rows.some(r=>!sx(r));let sg;
 if(hg){sg=[['ذكر','#3b82c4',r=>r.g=='ذكر'],['أنثى','#d4679f',r=>r.g=='أنثى']];if(d.rows.some(sx))sg.push(['غير محدد','#9aa5b1',sx])}else sg=[['ناجحون','#43a982',r=>r.av>=10],['غير ناجحين','#d64545',r=>r.av<10]];
 const m=RS.map(r=>sg.map(g=>d.rows.filter(x=>x.av>=r[0]&&x.av<r[1]&&g[2](x)).length)),tot=m.map(a=>a.reduce((x,y)=>x+y,0)),H=232,L=10,R=W-34,T=26,B=34,ph=H-T-B,bw=(R-L)/6,top=niceMax(Math.max(...tot,1));let s=axis(top,L,R,T,ph);
@@ -409,17 +414,24 @@ function nsData(b,c,type,crit){
  const bands=NB.slice(0,6).map((lo,i)=>({lo:lo*max,hi:NB[i+1]*max,l:f1(lo*max)+'–'+f1(NB[i+1]*max)}));
  const dist=bands.map((q,i)=>a.filter(v=>v>=q.lo-NE&&(i==5||v<q.hi-NE)).length);
  return{max,N:c.st.length,n,miss:c.st.length-n,pass,fail:n-pass,avg:n?a.reduce((x,y)=>x+y,0)/n:null,hi:n?Math.max(...a):null,lo:n?Math.min(...a):null,dist,bands,rows:e}}
-function nBar(d){const H=232,L=10,R=W-34,T=26,Bt=46,ph=H-T-Bt,bw=(R-L)/6,top=niceMax(Math.max(...d.dist,1));let s=axis(top,L,R,T,ph);
- d.dist.forEach((v,i)=>{const cx=R-(i+.5)*bw,h=v/top*ph,y=T+ph-h;s+=`<rect x="${(cx-bw*.31).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*.62).toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${CC[i]}"/>`+(v?tx(cx,y-5,v,{s:13,w:800}):'')+tx(cx,T+ph+15,d.bands[i].l,{s:10,w:600})+tx(cx,T+ph+30,pcs(v,d.n),{s:10,f:'#667'})});return svg(H,s)}
-function nHbar(d){const H=222,T=8,rh=(H-T-8)/6,top=Math.max(...d.dist,1),mx=250,x0=W-70;let s='';
- for(let k=0;k<6;k++){const i=5-k,v=d.dist[i],y=T+k*rh,len=v/top*mx;s+=tx(W-8,y+rh/2+4,d.bands[i].l,{a:'end',s:12,w:600})+`<rect x="${x0-mx}" y="${(y+rh*.18).toFixed(1)}" width="${mx}" height="${(rh*.64).toFixed(1)}" rx="4" fill="#eef1f3"/>`+(len?`<rect x="${(x0-len).toFixed(1)}" y="${(y+rh*.18).toFixed(1)}" width="${len.toFixed(1)}" height="${(rh*.64).toFixed(1)}" rx="4" fill="${CC[i]}"/>`:'')+tx(x0-len-5,y+rh/2+4,`${v} · ${pcs(v,d.n)}`,{a:'end',s:11,w:700})}return svg(H,s)}
-function nPie(d){const sl=[{n:'ناجحون',v:d.pass,c:'#43a982'},{n:'غير ناجحين',v:d.fail,c:'#d64545'}];return ring(sl,0)+lgd(sl.map(x=>[x.c,`${x.n} (≥ ${f1(d.max/2)}): <bdi dir="ltr">${x.v} (${pcs(x.v,d.n)})</bdi>`]))}
-function nDough(d){const sl=d.bands.map((q,i)=>({n:q.l,v:d.dist[i],c:CC[i]}));return ring(sl,58,fm(d.avg))+lgd(sl.map(x=>[x.c,`<bdi dir="ltr">${x.n}: ${x.v}</bdi>`]))}
+const NW=640,nsv=(h,b)=>`<svg viewBox="0 0 ${NW} ${h}" role="img" font-family="Cairo,Tahoma,sans-serif">${b}</svg>`,
+nax=(top,L,R,T,ph)=>{let s='';const st=top<=5?1:top/5;for(let t=0;t<=top+1e-9;t+=st){const y=T+ph-t/top*ph;s+=`<line x1="${L}" x2="${R}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${t?'#e1e5e8':'#8a949b'}"/>`+tx(R+8,y+4,f1(t),{a:'start',s:12,f:'#667'})}return s};
+function nBar(d){const H=310,L=14,R=NW-50,T=34,Bt=66,ph=H-T-Bt,bw=(R-L)/6,top=niceMax(Math.max(...d.dist,1));let s=nax(top,L,R,T,ph);
+ d.dist.forEach((v,i)=>{const cx=R-(i+.5)*bw,h=v/top*ph,y=T+ph-h;s+=`<rect x="${(cx-bw*.3).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*.6).toFixed(1)}" height="${h.toFixed(1)}" rx="4" fill="${CC[i]}"/>`+(v?tx(cx,y-7,v,{s:15,w:800}):'')+tx(cx,T+ph+20,d.bands[i].l,{s:12.5,w:600})+tx(cx,T+ph+40,pcs(v,d.n),{s:12,f:'#667'})});return nsv(H,s)}
+function nHbar(d){const H=310,T=10,rh=(H-T-10)/6,top=Math.max(...d.dist,1),tr=NW-125,tl=190,mx=tr-tl;let s='';
+ for(let k=0;k<6;k++){const i=5-k,v=d.dist[i],y=T+k*rh,len=v/top*mx,by=(y+rh*.18).toFixed(1),bh=(rh*.64).toFixed(1);s+=tx(NW-10,y+rh/2+5,d.bands[i].l,{a:'end',s:14,w:600})+`<rect x="${tl}" y="${by}" width="${mx}" height="${bh}" rx="5" fill="#eef1f3"/>`+(len?`<rect x="${(tr-len).toFixed(1)}" y="${by}" width="${len.toFixed(1)}" height="${bh}" rx="5" fill="${CC[i]}"/>`:'')+tx(tl-10,y+rh/2+5,`${v} · ${pcs(v,d.n)}`,{a:'end',s:13,w:700})}return nsv(H,s)}
+function nRing(sl,ri,mid){const tot=sl.reduce((a,x)=>a+x.v,0),H=320,cx=NW/2,cy=160,r=140,rm=ri?(r+ri)/2:r*.62,nz=sl.filter(x=>x.v);let s='',a=-Math.PI/2;
+ const lab=(x,ang,fr)=>fr<.06?'':tx(cx+rm*Math.cos(ang),cy+rm*Math.sin(ang)-2,x.v,{s:17,w:800,f:'#fff',x:HALO})+tx(cx+rm*Math.cos(ang),cy+rm*Math.sin(ang)+15,pcs(x.v,tot),{s:13,w:700,f:'#fff',x:HALO});
+ if(nz.length==1){const x=nz[0];s+=ri?`<circle cx="${cx}" cy="${cy}" r="${rm}" fill="none" stroke="${x.c}" stroke-width="${r-ri}"/>`:`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${x.c}"/>`;s+=lab(x,-Math.PI/2,1)}
+ else nz.forEach(x=>{const fr=x.v/tot,a1=a+fr*Math.PI*2;s+=`<path d="${arc(cx,cy,r,ri,a,a1)}" fill="${x.c}" stroke="#fff" stroke-width="2"/>`+lab(x,(a+a1)/2,fr);a=a1});
+ if(ri&&mid!=null)s+=tx(cx,cy-4,'المعدل',{s:15,f:'#667'})+tx(cx,cy+30,mid,{s:34,w:800});return nsv(H,s)}
+function nPie(d){const sl=[{n:'ناجحون',v:d.pass,c:'#43a982'},{n:'غير ناجحين',v:d.fail,c:'#d64545'}];return nRing(sl,0)+lgd(sl.map(x=>[x.c,`${x.n} (≥ ${f1(d.max/2)}): <bdi dir="ltr">${x.v} (${pcs(x.v,d.n)})</bdi>`]))}
+function nDough(d){const sl=d.bands.map((q,i)=>({n:q.l,v:d.dist[i],c:CC[i]}));return nRing(sl,70,fa(d.avg))+lgd(sl.map(x=>[x.c,`<bdi dir="ltr">${x.n}: ${x.v}</bdi>`]))}
 function nStack(d){const sx=r=>r.g!='ذكر'&&r.g!='أنثى',hg=d.rows.some(r=>!sx(r)),th=d.max/2;let sg;
  if(hg){sg=[['ذكر','#3b82c4',r=>r.g=='ذكر'],['أنثى','#d4679f',r=>r.g=='أنثى']];if(d.rows.some(sx))sg.push(['غير محدد','#9aa5b1',sx])}else sg=[['ناجحون','#43a982',r=>r.v>=th-NE],['غير ناجحين','#d64545',r=>r.v<th-NE]];
- const inb=(r,i)=>r.v>=d.bands[i].lo-NE&&(i==5||r.v<d.bands[i].hi-NE),m=d.bands.map((q,i)=>sg.map(x=>d.rows.filter(r=>inb(r,i)&&x[2](r)).length)),tot=m.map(a=>a.reduce((x,y)=>x+y,0)),H=232,L=10,R=W-34,T=26,Bt=34,ph=H-T-Bt,bw=(R-L)/6,top=niceMax(Math.max(...tot,1));let s=axis(top,L,R,T,ph);
- m.forEach((a,i)=>{const cx=R-(i+.5)*bw;let cum=0;a.forEach((v,j)=>{if(!v)return;const h=v/top*ph,y=T+ph-(cum+v)/top*ph;cum+=v;s+=`<rect x="${(cx-bw*.31).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*.62).toFixed(1)}" height="${h.toFixed(1)}" fill="${sg[j][1]}" stroke="#fff"/>`+(h>=14?tx(cx,y+h/2+4,v,{s:11,w:700,f:'#fff',x:HALO}):'')});
-  s+=(tot[i]?tx(cx,T+ph-tot[i]/top*ph-5,tot[i],{s:13,w:800}):'')+tx(cx,T+ph+15,d.bands[i].l,{s:10,w:600})});return svg(H,s)+lgd(sg.map(x=>[x[1],x[0]]))}
+ const inb=(r,i)=>r.v>=d.bands[i].lo-NE&&(i==5||r.v<d.bands[i].hi-NE),m=d.bands.map((q,i)=>sg.map(x=>d.rows.filter(r=>inb(r,i)&&x[2](r)).length)),tot=m.map(a=>a.reduce((x,y)=>x+y,0)),H=310,L=14,R=NW-50,T=34,Bt=50,ph=H-T-Bt,bw=(R-L)/6,top=niceMax(Math.max(...tot,1));let s=nax(top,L,R,T,ph);
+ m.forEach((a,i)=>{const cx=R-(i+.5)*bw;let cum=0;a.forEach((v,j)=>{if(!v)return;const h=v/top*ph,y=T+ph-(cum+v)/top*ph;cum+=v;s+=`<rect x="${(cx-bw*.3).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*.6).toFixed(1)}" height="${h.toFixed(1)}" fill="${sg[j][1]}" stroke="#fff"/>`+(h>=18?tx(cx,y+h/2+5,v,{s:13,w:700,f:'#fff',x:HALO}):'')});
+  s+=(tot[i]?tx(cx,T+ph-tot[i]/top*ph-7,tot[i],{s:15,w:800}):'')+tx(cx,T+ph+22,d.bands[i].l,{s:12.5,w:600})});return nsv(H,s)+lgd(sg.map(x=>[x[1],x[0]]))}
 const NF={bar:nBar,pie:nPie,doughnut:nDough,hbar:nHbar,stack:nStack};
 function nsSheet(b,c,t){const p=S.p,d=nsData(b,c,t,NSV.crit),cs=b.cats.filter(x=>x.on),kc=t=='cont'&&NSV.crit!='all'?cs.find(x=>x.id==NSV.crit):null,
  tn=NT.find(x=>x[0]==t)[1]+(kc?' — '+esc(kc.name):''),ch=nsCh(t),cn=NCH.find(x=>x[0]==ch)[1],K=(l,v,cl)=>`<div class="${cl||''}"><span>${l}</span><b>${v}</b></div>`,
@@ -428,9 +440,9 @@ function nsSheet(b,c,t){const p=S.p,d=nsData(b,c,t,NSV.crit),cs=b.cats.filter(x=
 <div class="meta"><div>مديرية التربية ${esc(p.dir)}<br>${esc(p.type)} ${esc(p.school)}</div><div>الأستاذ: <span class="r">${esc(p.name)}</span><br>الموسم الدراسي: ${esc(c.season)}</div></div>
 <div class="ttl"><span>إحصائيات <i>${tn}</i> – الفصل <i>${TN[c.term]}</i> – القسم : <i>${esc(c.name)}</i></span></div>
 <div class="nsn">${sc}</div>
-<div class="nsk">${K('العدد الإجمالي للتلاميذ',d.N)}${K('لديهم نقاط مدخلة',d.n)}${K('بدون نقاط',d.miss)}${K('أعلى نقطة',d.n?fm(d.hi):'—')}${K('أدنى نقطة',d.n?fm(d.lo):'—')}${K('المعدل العام للقسم',d.n?fm(d.avg):'—')}${K('الناجحون (≥ '+f1(d.max/2)+')',d.n?`${d.pass} · ${pcs(d.pass,d.n)}`:'—','ok2')}${K('غير الناجحين',d.n?`${d.fail} · ${pcs(d.fail,d.n)}`:'—','no2')}</div>
-<div class="nsch"><h4>${cn}</h4>${d.n?NF[ch](d):'<div class="emp">لا توجد نقاط مدخلة لهذا النوع بعد</div>'}</div>
-<table class="nst"><thead><tr><th>مستوى النقاط</th><th>عدد التلاميذ</th><th>النسبة</th><th></th></tr></thead><tbody>${d.bands.map((q,i)=>`<tr><td><i style="background:${CC[i]}"></i>من ${f1(q.lo)} إلى ${i==5?'':'أقل من '}${f1(q.hi)}</td><td>${d.dist[i]}</td><td><bdi dir="ltr">${pcs(d.dist[i],d.n)}</bdi></td><td><u style="width:${d.n?d.dist[i]/d.n*100:0}%;background:${CC[i]}"></u></td></tr>`).join('')}</tbody></table></div>`}
+<div class="nsk">${K('العدد الإجمالي للتلاميذ',d.N)}${K('لديهم نقاط مدخلة',d.n)}${K('بدون نقاط',d.miss)}${K('أعلى نقطة',d.n?fa(d.hi):'—')}${K('أدنى نقطة',d.n?fa(d.lo):'—')}${K('المعدل العام للقسم',d.n?fa(d.avg):'—')}${K('الناجحون (≥ '+f1(d.max/2)+')',d.n?`${d.pass} · ${pcs(d.pass,d.n)}`:'—','ok2')}${K('غير الناجحين',d.n?`${d.fail} · ${pcs(d.fail,d.n)}`:'—','no2')}</div>
+<div class="nsg"><div class="nsch"><h4>${cn}</h4><div class="nsc">${d.n?NF[ch](d):'<div class="emp">لا توجد نقاط مدخلة لهذا النوع بعد</div>'}</div></div>
+<div class="nsw"><table class="nst"><thead><tr><th>مستوى النقاط</th><th>عدد التلاميذ</th><th>النسبة</th><th></th></tr></thead><tbody>${d.bands.map((q,i)=>`<tr><td><i style="background:${CC[i]}"></i>من ${f1(q.lo)} إلى ${i==5?'':'أقل من '}${f1(q.hi)}</td><td>${d.dist[i]}</td><td><bdi dir="ltr">${pcs(d.dist[i],d.n)}</bdi></td><td><u style="width:${d.n?d.dist[i]/d.n*100:0}%;background:${CC[i]}"></u></td></tr>`).join('')}</tbody></table></div></div></div>`}
 function nsBody(b,c){return NSV.all?NT.map(t=>nsSheet(b,c,t[0])).join(''):nsSheet(b,c,NSV.type)}
 function nsView(){const b=B(),c=cur;if(!b){nsOn=false;return classView()}const cs=b.cats.filter(x=>x.on);if(NSV.crit!='all'&&!cs.find(x=>x.id==NSV.crit))NSV.crit='all';
  $('#app').innerHTML=`<div class="card noprint"><div class="row"><button class="fit g" onclick="nsGo(0)">← العودة إلى الدفتر والإحصائيات الأصلية</button><button class="fit" onclick="nsPrint(0)">تصدير PDF</button><button class="fit g" onclick="nsPrint(1)">PDF لكل الأنواع</button></div>
