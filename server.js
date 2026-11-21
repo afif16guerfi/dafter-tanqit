@@ -2,7 +2,7 @@ const express=require('express'),{MongoClient,ObjectId}=require('mongodb'),bcryp
 const {MONGODB_URI,JWT_SECRET,ADMIN_USER='admin',ADMIN_PASSWORD,DB_NAME='dafter',PORT=3000}=process.env;
 if(!MONGODB_URI||!JWT_SECRET){console.error('MONGODB_URI و JWT_SECRET مطلوبان');process.exit(1)}
 const app=express();app.set('trust proxy',1);
-app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'","'unsafe-inline'","https://cdnjs.cloudflare.com"],scriptSrcAttr:["'unsafe-inline'"],styleSrc:["'self'","'unsafe-inline'","https://fonts.googleapis.com"],fontSrc:["https://fonts.gstatic.com"],imgSrc:["'self'","data:"],connectSrc:["'self'"],upgradeInsecureRequests:null}}}));
+app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'","'unsafe-inline'","https://cdnjs.cloudflare.com"],scriptSrcAttr:["'unsafe-inline'"],styleSrc:["'self'","'unsafe-inline'","https://fonts.googleapis.com"],fontSrc:["https://fonts.gstatic.com","data:"],imgSrc:["'self'","data:"],connectSrc:["'self'","https://fonts.googleapis.com","https://fonts.gstatic.com"],upgradeInsecureRequests:null}}}));
 app.use(express.json({limit:'12mb'}));
 let db;const col=n=>db.collection(n),oid=x=>ObjectId.isValid(x)?new ObjectId(x):null;
 const pub=u=>({id:String(u._id),username:u.username,name:u.name,role:u.role,active:u.active,subject:u.subject||''});

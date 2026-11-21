@@ -152,11 +152,56 @@ html[data-ut=glass] #pxd .box{background:var(--bg)}
 @page pxp{size:A4 portrait;margin:8mm}
 @page pxl{size:A4 landscape;margin:8mm}
 @media print{body.pxm main,body.pxm header.top{display:none!important}body.pxm #pxo{display:block}#pxd{display:none!important}.pxs .wrap{overflow:visible!important;max-height:none!important}.pxs table.g{width:100%}.pxs .g td span{font-size:13px}}
+
+/* ===== تذييل المنصة الدائم (حقوق التصميم) ===== */
+body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+header.top{flex:0 0 auto}
+main{width:100%;flex:1 0 auto}
+#ft{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;font-size:13px;font-weight:600;line-height:1.5;color:var(--mut);background:var(--card);border-top:1px solid var(--bd);text-align:center}
+#ft b{color:var(--ink);font-weight:800}
+#ft i{font-style:normal;color:var(--teal)}
+@media print{#ft,#tst,#pgm{display:none!important}}
+
+/* ===== إشعارات التصدير ===== */
+#tst{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:90;display:flex;justify-content:center;padding:0 12px;pointer-events:none}
+#tst:empty{display:none}
+.tsb{pointer-events:auto;display:flex;align-items:center;gap:10px;max-width:min(580px,100%);padding:10px 14px;border-radius:12px;background:#1f2a2d;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.28);font-size:15px;font-weight:600;line-height:1.5;border-inline-start:5px solid var(--teal)}
+.tsb.ok{border-inline-start-color:#2fb36a}.tsb.er{border-inline-start-color:#e5484d}
+.tsb .tsi{font-weight:800;flex:0 0 auto}
+.tsb button{min-height:32px;padding:4px 10px;color:#fff;border:1px solid rgba(255,255,255,.4);background:transparent;flex:0 0 auto;font-size:13px}
+
+/* ===== صفحات PDF المباشر: تصميم ثابت يغطي كامل الصفحة (مستقل عن طول الجدول) ===== */
+#pgm{position:fixed;left:-30000px;top:0;visibility:hidden;pointer-events:none}
+.pgx{position:relative;overflow:hidden;border:0!important;border-radius:0!important;background:#fff;color:#111;direction:rtl;font-family:Cairo,Tahoma,sans-serif}
+.pgx::after{display:none!important}
+.pgfr{position:absolute;top:0;right:0;bottom:0;left:0;z-index:0}
+.pgfr::before,.pgfr::after{content:"";position:absolute;top:0;bottom:0;width:8px;background:linear-gradient(to bottom,var(--pp),var(--pd))}
+.pgfr::before{right:0}.pgfr::after{left:0}
+.pgx[data-th=academic] .pgfr{top:6px;right:6px;bottom:6px;left:6px;border:3px double var(--pd)}
+.pgx[data-th=academic] .pgfr::before,.pgx[data-th=academic] .pgfr::after{display:none}
+.pgh{position:absolute;top:0;left:0;right:0;z-index:2}
+.pgh .meta{padding:6px 28px}
+.pgh .ttl{margin:8px 26px 4px;padding:8px 22px;min-height:58px;font-size:24px}
+.pgh .pxsub{margin:2px 0 0}
+.pgb{position:absolute;left:26px;right:26px;z-index:1;overflow:hidden}
+.pgblk{display:flow-root}
+.pgf{position:absolute;left:0;right:0;bottom:0;z-index:2}
+.pgc{display:flex;justify-content:space-between;align-items:center;margin:0 26px;height:30px;font-size:13px;font-weight:800;color:var(--pd);border-top:1.5px solid var(--pp)}
+.pgc .pcr::before{content:"✦ ";color:var(--pp)}.pgc .pcr::after{content:" ✦";color:var(--pp)}
+.pgn{font-weight:600;color:#555}
+.pgbar{height:var(--fh);background:linear-gradient(to left,var(--pd) 45%,var(--pp) 45%)}
+.pgx .g td,.pgx .g th{position:static!important}
+.pgx .g td span{font-size:13px}
+.pgx .chs{grid-template-columns:1fr 1fr}.pgx .chs[data-n="1"]{grid-template-columns:1fr}
+.pgx .st div{padding:3px 8px;font-size:13px}.pgx .st{padding:4px 8px}
+.pgx .sth{margin-top:2px}
+.pgx .nsc,.pgx .nsw{overflow:visible}.pgx .nsc svg{min-width:0!important}.pgx .nst{min-width:0}.pgx .nsg{grid-template-columns:minmax(0,1fr)}
 </style>
 </head>
 <body>
 <header class="top"><b>دفتر التنقيط</b><span id="hs"></span><small id="sv" style="opacity:.8"></small><button class="g" onclick="home()">الرئيسية</button><button id="ab" class="g hid" onclick="adminView()">الإدارة</button><button class="g" onclick="uiOpen()">المظهر</button><button class="g" onclick="logout()">خروج</button></header>
 <main id="app"></main>
+<footer id="ft" class="noprint"><i>✦</i><span>من تصميم الأستاذ <b>قرفي عفيف</b></span><i>✦</i></footer>
 <script>
 const K='dtq1',$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let S=null;const DEF=()=>({p:{season:'2026/2027',term:'1',type:'متوسطة'},cl:[]});let cur=null,sub=null,fs='',ft='',sa=0,nsOn=false;
@@ -532,12 +577,23 @@ function nsData(b,c,type,crit){
  const bands=NB.slice(0,6).map((lo,i)=>({lo:lo*max,hi:NB[i+1]*max,l:f1(lo*max)+'–'+f1(NB[i+1]*max)}));
  const dist=bands.map((q,i)=>a.filter(v=>v>=q.lo-NE&&(i==5||v<q.hi-NE)).length);
  return{max,N:c.st.length,n,miss:c.st.length-n,pass,fail:n-pass,avg:n?a.reduce((x,y)=>x+y,0)/n:null,hi:n?Math.max(...a):null,lo:n?Math.min(...a):null,dist,bands,rows:e}}
-const NW=780,nsv=(h,b,w)=>`<svg viewBox="0 0 ${w||NW} ${h}" style="min-width:${w||NW}px" role="img" font-family="Cairo,Tahoma,sans-serif">${b}</svg>`,
+const NW=780,nsv=(h,b,w)=>`<svg viewBox="0 0 ${w||NW} ${h}" style="min-width:${w||NW}px;direction:ltr" direction="ltr" role="img" font-family="Cairo,Tahoma,sans-serif">${b}</svg>`,
 nax=(top,L,R,T,ph)=>{let s='';const st=top<=5?1:top/5;for(let t=0;t<=top+1e-9;t+=st){const y=T+ph-t/top*ph;s+=`<line x1="${L}" x2="${R}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${t?'#e1e5e8':'#8a949b'}"/>`+tx(R+8,y+4,f1(t),{a:'start',s:12,f:'#667'})}return s};
 function nBar(d){const H=310,L=14,R=NW-50,T=34,Bt=66,ph=H-T-Bt,bw=(R-L)/6,top=niceMax(Math.max(...d.dist,1));let s=nax(top,L,R,T,ph);
  d.dist.forEach((v,i)=>{const cx=R-(i+.5)*bw,h=v/top*ph,y=T+ph-h;s+=`<rect x="${(cx-bw*.3).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*.6).toFixed(1)}" height="${h.toFixed(1)}" rx="4" fill="${CC[i]}"/>`+(v?tx(cx,y-7,v,{s:15,w:800}):'')+tx(cx,T+ph+20,d.bands[i].l,{s:12.5,w:600})+tx(cx,T+ph+40,pcs(v,d.n),{s:12,f:'#667'})});return nsv(H,s)}
-function nHbar(d){const lw=Math.max(...d.bands.map(q=>q.l.length))*10+36,vw=170,tw=Math.max(460,NW-lw-vw-80),tl=28+vw+14,tr=tl+tw,W2=tr+12+lw+28,H=340,T=12,rh=(H-T-12)/6,top=Math.max(...d.dist,1);let s='';
- for(let k=0;k<6;k++){const i=5-k,v=d.dist[i],y=T+k*rh,len=v/top*tw,by=(y+rh*.16).toFixed(1),bh=(rh*.68).toFixed(1);s+=tx(W2-28,y+rh/2+6,d.bands[i].l,{a:'end',s:15,w:600})+`<rect x="${tl}" y="${by}" width="${tw}" height="${bh}" rx="6" fill="#eef1f3"/>`+(len?`<rect x="${(tr-len).toFixed(1)}" y="${by}" width="${len.toFixed(1)}" height="${bh}" rx="6" fill="${CC[i]}"/>`:'')+tx(tl-14,y+rh/2+6,`${v} · ${pcs(v,d.n)}`,{a:'end',s:15,w:700})}return nsv(H,s,W2)}
+/* الأعمدة الأفقية: مساحة الرسم نفسها تُحسب من عرض الحاوية وطول التسميات وأكبر قيمة (لا مقاسات ثابتة).
+   التخطيط (من اليسار): هامش | القيمة | فراغ | شريط التعبئة | فراغ | التسمية | هامش، والـ viewBox يساوي مجموعها تماماً
+   فلا يُقتطع أي طرف. اتجاه الـ svg هو ltr حتى يعمل text-anchor كما صُمّم (في الصفحة RTL كان يقلب end/start فتُقتطع التسميات). */
+let NHW=0;
+const nhw=()=>{if(NHW)return NHW;const e=document.getElementById('nsb'),w=e&&e.clientWidth?e.clientWidth-60:innerWidth-90;return Math.max(230,Math.min(1000,w))};
+function nHbar(d){const Wv=nhw(),nr=Wv<520,vt=d.dist.map(v=>`${v} · ${pcs(v,d.n)}`),ml=Math.max(...d.bands.map(q=>q.l.length)),mv=Math.max(...vt.map(t=>t.length)),
+ P=nr?10:22,G=nr?8:14,rh=nr?44:54,T=10,H=T+6*rh+10;let fs=nr?13:15,lw,vw,tw0;
+ for(;;){const cw=fs*.62;lw=Math.max(50,Math.ceil(ml*cw+12));vw=Math.max(66,Math.ceil(mv*cw*1.08+12));tw0=Wv-2*P-lw-vw-2*G;if(tw0>=110||fs<=10)break;fs--}   /* تصغير الخط أولاً قبل أي تمرير أفقي */
+ const tw=Math.max(80,tw0),W2=2*P+lw+vw+2*G+tw,tl=P+vw+G,tr=tl+tw,top=Math.max(...d.dist,1);let s='';
+ for(let k=0;k<6;k++){const i=5-k,v=d.dist[i],y=T+k*rh,len=v/top*tw,by=(y+rh*.17).toFixed(1),bh=(rh*.66).toFixed(1),ty=y+rh/2+fs*.35;
+  s+=tx(W2-P,ty,d.bands[i].l,{a:'end',s:fs,w:600})+`<rect x="${tl}" y="${by}" width="${tw}" height="${bh}" rx="6" fill="#eef1f3"/>`+(len?`<rect x="${(tr-len).toFixed(1)}" y="${by}" width="${len.toFixed(1)}" height="${bh}" rx="6" fill="${CC[i]}"/>`:'')+tx(tl-G,ty,vt[i],{a:'end',s:fs,w:700})}
+ return`<svg viewBox="0 0 ${W2} ${H}" style="width:100%;max-width:${W2}px;${W2>Wv+1?`min-width:${W2}px;`:''}direction:ltr" direction="ltr" role="img" font-family="Cairo,Tahoma,sans-serif">${s}</svg>`}
+addEventListener('resize',()=>{clearTimeout(nhw.t);nhw.t=setTimeout(()=>{if(nsOn&&cur&&document.getElementById('nsb')&&B()&&(NSV.all||nsCh(NSV.type)=='hbar'))nsLive()},200)});
 function nRing(sl,ri,mid){const tot=sl.reduce((a,x)=>a+x.v,0),H=320,cx=NW/2,cy=160,r=140,rm=ri?(r+ri)/2:r*.62,nz=sl.filter(x=>x.v);let s='',a=-Math.PI/2;
  const lab=(x,ang,fr)=>fr<.06?'':tx(cx+rm*Math.cos(ang),cy+rm*Math.sin(ang)-2,x.v,{s:17,w:800,f:'#fff',x:HALO})+tx(cx+rm*Math.cos(ang),cy+rm*Math.sin(ang)+15,pcs(x.v,tot),{s:13,w:700,f:'#fff',x:HALO});
  if(nz.length==1){const x=nz[0];s+=ri?`<circle cx="${cx}" cy="${cy}" r="${rm}" fill="none" stroke="${x.c}" stroke-width="${r-ri}"/>`:`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${x.c}"/>`;s+=lab(x,-Math.PI/2,1)}
@@ -571,7 +627,10 @@ ${NSV.type=='cont'?`<div class="row"><select onchange="nsSet('crit',this.value)"
 function nsSet(k,v){NSV[k]=v;render()}
 function nsChart(v){S.prefs=S.prefs||{};const o=S.prefs.ns=S.prefs.ns||{};o.ch=o.ch||{};o.ch[NSV.type]=v;save();render()}
 function nsGo(on){nsOn=!!on;render();scrollTo(0,0)}
-function nsPrint(all){pxUnmount();NSV.all=all;render();setTimeout(()=>print(),60)}
+function nsPrintLegacy(all){pxUnmount();NSV.all=all;render();setTimeout(()=>print(),60)}
+function nsPrint(all){const b=B(),c=cur;if(!b)return;const ty=all?NT.map(t=>t[0]):[NSV.type],tn=all?'كل-الأنواع':NT.find(x=>x[0]==NSV.type)[1];
+ pdfDirect({name:pdfFile(['إحصائيات',tn,curSubj(),c.name,'الفصل-'+TN[c.term]]),title:'إحصائيات — '+curSubj(),
+  build:h=>{NHW=690;try{return ty.flatMap(t=>pdfNsPages(h,c,b,t))}finally{NHW=0}},fallback:()=>nsPrintLegacy(all)})}
 function nsLive(){clearTimeout(NSV.tm);NSV.tm=setTimeout(()=>{const x=$('#nsb');if(x&&cur&&B())x.innerHTML=nsBody(B(),cur)},120)}
 addEventListener('afterprint',()=>{if(NSV.all){NSV.all=0;if(nsOn&&cur)nsView()}});
 
@@ -583,7 +642,7 @@ function pxOpen(){if(!S||!Array.isArray(S.cl))return;
  PX={st:1,or:'auto',sel:new Set(k?[k.id]:S.cl.filter(c=>!c.ar).map(c=>c.id)),fs:k?k.season:'',ft:k?String(k.term):'',ar:k&&k.ar?1:0};pxR()}
 function pxR(){let m=$('#pxd');if(!m){m=document.createElement('div');m.id='pxd';m.className='noprint';document.body.appendChild(m)}
  const L=pxList(),seasons=[...new Set(S.cl.map(c=>c.season))];
- m.innerHTML=`<div class="box" role="dialog" aria-label="تصدير PDF"><h2 style="margin:0 0 4px">تصدير PDF</h2><p class="mut" style="margin:0">اختر المحتوى والأقسام ثم اضغط «تصدير». سيُفتح مربع الطباعة: اختر «حفظ بصيغة PDF».</p>
+ m.innerHTML=`<div class="box" role="dialog" aria-label="تصدير PDF"><h2 style="margin:0 0 4px">تصدير PDF</h2><p class="mut" style="margin:0">اختر المحتوى والأقسام ثم اضغط «تصدير». سيُنزَّل ملف PDF مباشرة إلى جهازك.</p>
 <h3>1) الإحصائيات</h3><div class="chips"><label class="chip"><input type="radio" name="pxst" ${PX.st?'checked':''} onchange="PX.st=1;pxSum()"> مع الإحصائيات</label><label class="chip"><input type="radio" name="pxst" ${PX.st?'':'checked'} onchange="PX.st=0;pxSum()"> بدون إحصائيات (الجداول فقط)</label></div>
 <h3>2) اتجاه الصفحة</h3><select onchange="PX.or=this.value;pxSum()"><option value="auto" ${PX.or=='auto'?'selected':''}>تلقائي (حسب عرض الجدول)</option><option value="portrait" ${PX.or=='portrait'?'selected':''}>A4 عمودي</option><option value="landscape" ${PX.or=='landscape'?'selected':''}>A4 أفقي</option></select>
 <h3>3) الأقسام</h3><div class="row"><select onchange="PX.fs=this.value;pxR()"><option value="">كل المواسم</option>${seasons.map(s=>`<option value="${esc(s)}" ${s==PX.fs?'selected':''}>${esc(s)}</option>`).join('')}</select><select onchange="PX.ft=this.value;pxR()"><option value="">كل الفصول</option>${[1,2,3].map(i=>`<option value="${i}" ${PX.ft==i?'selected':''}>الفصل ${TN[i]}</option>`).join('')}</select><label class="chip"><input type="checkbox" ${PX.ar?'checked':''} onchange="PX.ar=this.checked?1:0;pxR()"> المؤرشفة</label></div>
@@ -599,9 +658,11 @@ function pxAll(on){pxList().forEach(c=>on?PX.sel.add(c.id):PX.sel.delete(c.id));
 function pxClose(){const m=$('#pxd');if(m)m.remove()}
 function pxMount(h){pxUnmount();const x=document.createElement('div');x.id='pxo';x.innerHTML=h;document.body.appendChild(x);document.body.classList.add('pxm')}
 function pxUnmount(){const x=document.getElementById('pxo');if(x)x.remove();document.body.classList.remove('pxm')}
-function pxGo(){const cl=S.cl.filter(c=>PX.sel.has(c.id));if(!cl.length)return alert('اختر قسماً واحداً على الأقل');
- let h;try{h=pxBuild(cl,{st:PX.st,or:PX.or})}catch(e){console.error(e);return alert('تعذّر إنشاء ملف PDF: '+e.message)}
- pxClose();pxMount(h);setTimeout(()=>print(),150)}
+/* التصدير المباشر: يُنشئ ملف PDF ويُنزّله فوراً (دون معاينة أو نافذة طباعة). الطباعة القديمة تبقى احتياطاً عند الفشل فقط. */
+function pxGo(){const cl=S.cl.filter(c=>PX.sel.has(c.id));if(!cl.length)return toast('اختر قسماً واحداً على الأقل','er',5000);
+ const o={st:PX.st,or:PX.or};pxClose();
+ pdfDirect({name:pdfName(cl,o),title:'دفتر التنقيط — '+curSubj(),build:h=>pdfPlanClasses(h,cl,o),
+  fallback:()=>{let h;try{h=pxBuild(cl,o)}catch(e){return toast('تعذّر إنشاء الملف: '+e.message,'er',8000)}pxMount(h);setTimeout(()=>print(),150)}})}
 function pxBuild(cl,o){const sc=cur,ss=sub;let out='';
  try{cl.forEach(c=>{(c.sub.length?c.sub:[newSub(curSubj())]).forEach(b=>{cur=c;sub=b.id;out+=pxSec(c,b,o)})})}finally{cur=sc;sub=ss}return out}
 function pxSec(c,b,o){const cs=b.cats.filter(x=>x.on),n=cs.length,W=264+(n+4)*54,PW=734,LW=1063;
@@ -616,6 +677,102 @@ function pxSec(c,b,o){const cs=b.cats.filter(x=>x.on),n=cs.length,W=264+(n+4)*54
  if(z<1){const w=sh.querySelector('.wrap');if(w)w.style.zoom=z}
  return'<section class="pxs '+or+'">'+sh.outerHTML+'</section>'}
 addEventListener('afterprint',pxUnmount);
+
+/* ===== محرك تصدير PDF المباشر =====
+   كل صفحة A4 تُبنى كعنصر ثابت الأبعاد: الترويسة أعلى الصفحة والتذييل أسفلها والإطار الجانبي بكامل الارتفاع،
+   والمحتوى (صفوف الجدول أو الإحصائيات) يُوزَّع داخل المساحة بين الترويسة والتذييل بعد قياس ارتفاعه فعلياً،
+   فلا يتبع التصميم طول البيانات. تُرسم الصفحة بمحرك المتصفح نفسه (SVG foreignObject) إلى صورة JPEG ثم تُجمَّع في ملف PDF
+   وتُنزَّل مباشرة. لا مكتبات خارجية. الخطوط تُضمَّن من Google Fonts عند توفر الاتصال، وإلا تُستعمل خطوط النظام. */
+const PGS={p:{w:794,h:1123},l:{w:1123,h:794}},PGX=26,PGV=8,CREDIT='من تصميم الأستاذ قرفي عفيف';
+let PGBUSY=0,PGFC=null;
+function toast(msg,kind,ms,act){let t=$('#tst');if(!t){t=document.createElement('div');t.id='tst';t.className='noprint';t.setAttribute('role','status');t.setAttribute('aria-live','polite');document.body.appendChild(t)}
+ clearTimeout(toast.t);
+ t.innerHTML=`<div class="tsb ${kind||''}"><span class="tsi">${kind=='ok'?'✓':kind=='er'?'✕':'⏳'}</span><span class="tsm"></span>${act?'<button class="tsa"></button>':''}${kind=='er'||kind=='ok'?'<button class="tsx" aria-label="إغلاق">✕</button>':''}</div>`;
+ t.querySelector('.tsm').textContent=msg;
+ const a=t.querySelector('.tsa');if(a){a.textContent=act[0];a.onclick=()=>{t.innerHTML='';act[1]()}}
+ const x=t.querySelector('.tsx');if(x)x.onclick=()=>{t.innerHTML=''};
+ if(ms)toast.t=setTimeout(()=>{t.innerHTML=''},ms)}
+const fileSafe=s=>String(s).replace(/[\\/:*?"<>|\u0000-\u001f]+/g,' ').trim().replace(/\s+/g,'-').replace(/-+/g,'-');
+function pdfFile(parts){const d=new Date();return[...parts,d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())].map(fileSafe).filter(Boolean).join('_').slice(0,160)+'.pdf'}
+function pdfName(cl,o){const tm=[...new Set(cl.map(c=>c.term))];return pdfFile(['دفتر-التنقيط',curSubj(),cl.length==1?cl[0].name:cl.length+' أقسام',tm.length==1?'الفصل-'+TN[tm[0]]:'',o.st?'مع-الإحصائيات':'بدون-إحصائيات'])}
+const pdfHost=()=>{let h=document.getElementById('pgm');if(!h){h=document.createElement('div');h.id='pgm';h.setAttribute('aria-hidden','true');document.body.appendChild(h)}return h};
+async function pdfReady(){const T=PT[pdfCfg().th],fs=[...new Set(['Cairo',T.f])];
+ await Promise.all(fs.flatMap(f=>[400,600,800].map(w=>document.fonts.load(w+' 16px '+f,'أبجد هوز 0123 abc').catch(()=>0))));await document.fonts.ready}
+/* تضمين الخطوط داخل صورة الـ SVG (الخطوط الخارجية لا تُحمَّل داخل الصور) */
+function pdfFonts(){return PGFC||(PGFC=(async()=>{try{const l=document.querySelector('link[href*="fonts.googleapis.com"]');if(!l)return'';
+ const fam=new Set(['Cairo',PT[pdfCfg().th].f]),css=await(await fetch(l.href,{mode:'cors'})).text(),re=/\/\*\s*([\w-]+)\s*\*\/\s*@font-face\s*\{([^}]*)\}/g,g=new Map();let m;
+ while((m=re.exec(css))){const sub=m[1],b=m[2],f=(b.match(/font-family:\s*['"]?([^'";]+)/)||[])[1],u=(b.match(/url\((['"]?)(https:[^)'"]+)\1\)/)||[])[2],w=(b.match(/font-weight:\s*(\d+)/)||[])[1];
+  if(!f||!u||!fam.has(f.trim())||(sub!='arabic'&&sub!='latin'))continue;const k=f+'|'+sub+'|'+u;if(!g.has(k))g.set(k,{f:f.trim(),u,w:[],body:b});if(w)g.get(k).w.push(+w)}
+ const data=new Map(),get=u=>data.get(u)||data.set(u,fetch(u,{mode:'cors'}).then(r=>r.blob()).then(b=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(b)}))).get(u);
+ const out=await Promise.all([...g.values()].map(async x=>{try{const d=await get(x.u),ur=(x.body.match(/unicode-range:\s*([^;]+)/)||[])[1],w=x.w.length?(Math.min(...x.w)==Math.max(...x.w)?x.w[0]:Math.min(...x.w)+' '+Math.max(...x.w)):400;
+  return`@font-face{font-family:'${x.f}';font-style:normal;font-weight:${w};src:url(${d});${ur?'unicode-range:'+ur+';':''}}`}catch(e){return''}}));return out.join('\n')}catch(e){console.warn('تعذّر تضمين الخطوط، ستُستعمل خطوط النظام',e);return''}})())}
+const pdfCss=()=>{const s=document.querySelector('style');return(s?s.textContent:'').replace(/@media\(prefers-color-scheme:dark\)\{[^}]*\{[^}]*\}\}/,'')}
+function pdfB64(s){const u=new TextEncoder().encode(s);let b='';for(let i=0;i<u.length;i+=32768)b+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(b)}
+async function pdfRaster(el,w,h,css,sc,warm){
+ const xml=new XMLSerializer().serializeToString(el),svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><style><![CDATA[${css}]]></style><foreignObject x="0" y="0" width="${w}" height="${h}">${xml}</foreignObject></svg>`,
+ url='data:image/svg+xml;base64,'+pdfB64(svg),load=()=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>no(new Error('تعذّر رسم الصفحة في هذا المتصفح'));i.src=url});
+ if(warm)await load();   // الرسم الأول يُحمِّل الخطوط المضمّنة، فنرسم مرة ثانية للصفحة الفعلية
+ const img=await load(),cv=document.createElement('canvas');cv.width=Math.round(w*sc);cv.height=Math.round(h*sc);
+ const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.drawImage(img,0,0,cv.width,cv.height);
+ const b=await new Promise((ok,no)=>{try{cv.toBlob(r=>r?ok(r):no(new Error('تعذّر ترميز الصفحة')),'image/jpeg',.92)}catch(e){no(e)}});
+ return{jpg:new Uint8Array(await b.arrayBuffer()),w:cv.width,h:cv.height}}
+function pdfWrite(pg,title){const E=new TextEncoder(),ch=[],ofs=[];let pos=0;
+ const put=x=>{const u=typeof x=='string'?E.encode(x):x;ch.push(u);pos+=u.length},obj=(n,f)=>{ofs[n]=pos;put(n+' 0 obj\n');f();put('\nendobj\n')},N=pg.length,PW={p:595.28,l:841.89},PH={p:841.89,l:595.28},z=n=>String(n).padStart(2,'0'),
+ hex=s=>{let h='FEFF';for(const c of s){const k=c.codePointAt(0);if(k>65535){const q=k-65536;h+=(55296+(q>>10)).toString(16)+(56320+(q&1023)).toString(16)}else h+=k.toString(16).padStart(4,'0')}return'<'+h+'>'};
+ put('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+ obj(1,()=>put('<< /Type /Catalog /Pages 2 0 R >>'));
+ obj(2,()=>put(`<< /Type /Pages /Count ${N} /Kids [${pg.map((_,i)=>(4+i*3)+' 0 R').join(' ')}] >>`));
+ const d=new Date();obj(3,()=>put(`<< /Title ${hex(title)} /Producer ${hex('دفتر التنقيط')} /CreationDate (D:${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}) >>`));
+ pg.forEach((p,i)=>{const o=4+i*3,w=PW[p.or],h=PH[p.or],cs=`q ${w} 0 0 ${h} 0 0 cm /Im0 Do Q`;
+  obj(o,()=>put(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${w} ${h}] /Resources << /XObject << /Im0 ${o+2} 0 R >> >> /Contents ${o+1} 0 R >>`));
+  obj(o+1,()=>put(`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`));
+  obj(o+2,()=>{put(`<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.jpg.length} >>\nstream\n`);put(p.jpg);put('\nendstream')})});
+ const xo=pos,M=4+N*3;put(`xref\n0 ${M}\n0000000000 65535 f \n`);for(let n=1;n<M;n++)put(String(ofs[n]).padStart(10,'0')+' 00000 n \n');
+ put(`trailer\n<< /Size ${M} /Root 1 0 R /Info 3 0 R >>\nstartxref\n${xo}\n%%EOF`);return new Blob(ch,{type:'application/pdf'})}
+function pdfSave(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},5000)}
+/* عنصر صفحة كاملة: إطار + ترويسة (أعلى) + جسم (بين الترويسة والتذييل) + تذييل (أسفل) */
+function pdfPageEl(pg,i,N){const m=PGS[pg.or],t=document.createElement('div');t.innerHTML=`<div class="sheet pgx" ${pdfAttr()}></div>`;const el=t.firstChild;
+ el.style.width=m.w+'px';el.style.height=m.h+'px';el.setAttribute('dir','rtl');el.setAttribute('lang','ar');
+ el.innerHTML=`<div class="pgfr"></div><div class="pgh">${pg.head}</div><div class="pgb"></div><div class="pgf"><div class="pgc"><span class="pcr">${CREDIT}</span><span class="pgn">صفحة <bdi>${i}</bdi> من <bdi>${N}</bdi></span></div><div class="pgbar"></div></div>`;
+ const b=el.querySelector('.pgb');b.style.top=(pg.hh+PGV)+'px';b.style.bottom=(pg.fh+PGV)+'px';if(pg.body)b.appendChild(pg.body);return el}
+function pdfProbe(host,or,head){const m=PGS[or],pr=pdfPageEl({or,head,hh:0,fh:0},0,0);host.appendChild(pr);
+ const hh=pr.querySelector('.pgh').offsetHeight,fh=pr.querySelector('.pgf').offsetHeight;pr.remove();return{hh,fh,bh:m.h-hh-fh-2*PGV}}
+function pdfBox(host,or){const m=PGS[or],t=document.createElement('div');t.innerHTML=`<div class="sheet pgx" ${pdfAttr()}><div class="pgb" style="position:static;overflow:visible"></div></div>`;const el=t.firstChild;
+ el.style.width=m.w+'px';el.style.height='auto';el.style.overflow='visible';const b=el.querySelector('.pgb');b.style.width=(m.w-2*PGX)+'px';host.appendChild(el);return b}
+function pdfFit(el,h,bh){if(h<=bh+.5)return el;const s=Math.max(.55,bh/h),w=document.createElement('div');w.style.cssText='height:'+bh+'px;overflow:hidden';el.style.cssText+=';width:'+(100/s)+'%;transform:scale('+s+');transform-origin:top right';w.appendChild(el);return w}
+/* توزيع كتل HTML (مؤشرات، مخططات، جداول) على صفحات حسب ارتفاعها الفعلي */
+function pdfFlowPages(host,or,head,blocks){const P=pdfProbe(host,or,head),box=pdfBox(host,or),els=blocks.map(h=>{const e=document.createElement('div');e.className='pgblk';e.innerHTML=h;box.appendChild(e);return e}),hs=els.map(e=>e.getBoundingClientRect().height),pgs=[];let a=[],y=0;
+ els.forEach((e,i)=>{if(a.length&&y+hs[i]>P.bh){pgs.push(a);a=[];y=0}a.push(i);y+=hs[i]});if(a.length)pgs.push(a);box.parentNode.remove();
+ return pgs.map(q=>{const w=document.createElement('div');q.forEach(i=>w.appendChild(pdfFit(els[i].cloneNode(true),hs[i],P.bh)));return{or,head,hh:P.hh,fh:P.fh,body:w}})}
+function pdfNsPages(host,c,b,t){const d=document.createElement('div');d.innerHTML=nsSheet(b,c,t);const sh=d.firstElementChild,head=['.band','.meta','.ttl'].map(s=>sh.querySelector(s).outerHTML).join(''),bl=[sh.querySelector('.nsn').outerHTML,sh.querySelector('.nsk').outerHTML];
+ sh.querySelectorAll('.nsg>*').forEach(e=>bl.push('<div class="nsg">'+e.outerHTML+'</div>'));return pdfFlowPages(host,'p',head,bl)}
+function pdfPlanClasses(host,cl,o){const sc=cur,ss=sub,out=[];try{cl.forEach(c=>(c.sub.length?c.sub:[newSub(curSubj())]).forEach(b=>{cur=c;sub=b.id;out.push(...pdfSec(host,c,b,o))}))}finally{cur=sc;sub=ss}return out}
+function pdfSec(host,c,b,o){const cs=b.cats.filter(x=>x.on),n=cs.length,Wd=264+(n+4)*54,or=o.or=='landscape'?'l':o.or=='portrait'?'p':(Wd<=760?'p':'l'),av=PGS[or].w-2*PGX,z=Math.min(1,av/(264+(n+4)*40)),Lw=z<1?av/z:av;
+ const d=document.createElement('div');d.innerHTML=sheet(b);const sh=d.firstElementChild;
+ sh.querySelectorAll('td input').forEach(i=>{const s=document.createElement('span');s.textContent=i.getAttribute('value')||'';i.replaceWith(s)});
+ c.st.forEach(s=>{const r=calc(b,s.id),a=sh.querySelector('[id="av_'+s.id+'"]'),k=sh.querySelector('[id="cc_'+s.id+'"]');if(!a||!k)return;k.textContent=fm(r.cc);a.textContent=avTxt(r);a.className='ro '+(r.av==null?'':r.av>=10?'pass':'fail')});
+ const head=sh.querySelector('.band').outerHTML+sh.querySelector('.meta').outerHTML+sh.querySelector('.ttl').outerHTML+(c.sub.length>1?'<div class="pxsub">المادة: '+esc(b.name)+'</div>':''),P=pdfProbe(host,or,head),
+ tbl=sh.querySelector('table.g');tbl.style.minWidth='0';tbl.style.width=Lw+'px';
+ const box=pdfBox(host,or),hold=document.createElement('div');hold.style.width=Lw+'px';hold.appendChild(tbl);box.appendChild(hold);
+ const rows=[...tbl.tBodies[0].rows],th=tbl.tHead.getBoundingClientRect().height,rh=rows.map(r=>r.getBoundingClientRect().height);box.parentNode.remove();
+ const mk=(a,e,h)=>{const w=document.createElement('div');w.style.cssText='width:'+av+'px;height:'+Math.ceil(h)+'px;overflow:hidden';const i=document.createElement('div');i.style.cssText='width:'+Lw+'px'+(z<1?';transform:scale('+z+');transform-origin:top right':'');
+  const t=tbl.cloneNode(false);t.style.width=Lw+'px';[...tbl.children].forEach(x=>{if(x.tagName!='TBODY')t.appendChild(x.cloneNode(true))});const tb=document.createElement('tbody');rows.slice(a,e).forEach(r=>tb.appendChild(r.cloneNode(true)));t.appendChild(tb);i.appendChild(t);w.appendChild(i);return w},
+ pages=[];let i=0;
+ do{let h=th*z+3,j=i;while(j<rows.length&&(j==i||h+rh[j]*z<=P.bh)){h+=rh[j]*z;j++}pages.push({or,head,hh:P.hh,fh:P.fh,body:mk(i,j,h)});i=j}while(i<rows.length);
+ if(o.st){const k=pdfCfg().kp?kpHTML(b,c):'',g=chartsHTML(b);if(k||g){const bl=[sh.querySelector('.sth').outerHTML];if(k)bl.push(k);
+  if(g){const t=document.createElement('div');t.innerHTML=g;const cd=[...t.querySelectorAll('.ch')];for(let q=0;q<cd.length;q+=2)bl.push(`<div class="chs" data-n="${cd.length==1?1:2}">${cd.slice(q,q+2).map(x=>x.outerHTML).join('')}</div>`)}
+  pages.push(...pdfFlowPages(host,or,head,bl))}}
+ return pages}
+async function pdfDirect(job){if(PGBUSY)return toast('هناك عملية تصدير جارية، انتظر انتهاءها ثم أعد المحاولة','',4000);
+ PGBUSY=1;const host=pdfHost();
+ try{toast('جارٍ تجهيز ملف PDF…');await new Promise(r=>setTimeout(r,30));await pdfReady();
+  const pages=await job.build(host);if(!pages.length)throw new Error('لا يوجد محتوى للتصدير');
+  const N=pages.length,css=pdfCss()+'\n'+await pdfFonts(),sc=N>40?1.5:2,imgs=[];
+  for(let i=0;i<N;i++){toast(`جارٍ إنشاء الصفحة ${i+1} من ${N}…`);await new Promise(r=>setTimeout(r,0));
+   const m=PGS[pages[i].or],r=await pdfRaster(pdfPageEl(pages[i],i+1,N),m.w,m.h,css,sc,i==0);r.or=pages[i].or;imgs.push(r)}
+  pdfSave(pdfWrite(imgs,job.title),job.name);toast(`تم تحميل الملف: ${job.name} (${N} ${N==1?'صفحة':'صفحات'})`,'ok',8000)}
+ catch(e){console.error(e);toast('تعذّر إنشاء ملف PDF: '+((e&&e.message)||e),'er',0,job.fallback?['فتح مربع الطباعة بدلاً من ذلك',job.fallback]:null)}
+ finally{PGBUSY=0;host.innerHTML=''}}
 
 boot();
 </script>
