@@ -51,9 +51,16 @@ app.patch('/api/users/:id',A,wrap(async(q,s)=>{const id=oid(q.params.id);if(!id)
 app.delete('/api/users/:id',A,wrap(async(q,s)=>{const id=oid(q.params.id),u=id&&await col('users').findOne({_id:id});if(!u)return s.status(404).json({error:'غير موجود'});if(u.role!=='teacher')return bad(s,'لا يمكن حذف حساب الإدارة');
  await Promise.all([col('users').deleteOne({_id:id}),col('data').deleteOne({_id:id}),col('snapshots').deleteMany({uid:id})]);audit(q.user._id,'delete_user',u.username);s.json({ok:1})}));
 
+app.get('/healthz',(q,s)=>s.type('text').send('ok'));  // نقطة فحص خفيفة للإبقاء على الخدمة مستيقظة
 app.use(express.static(path.join(__dirname,'public')));
 app.use('/api',(q,s)=>s.status(404).json({error:'غير موجود'}));
 (async()=>{const cl=await new MongoClient(MONGODB_URI).connect();db=cl.db(DB_NAME);
  await col('users').createIndex({username:1},{unique:true});await col('snapshots').createIndex({uid:1,at:-1});
  if(ADMIN_PASSWORD&&!(await col('users').findOne({role:'admin'}))){await col('users').insertOne({username:ADMIN_USER.toLowerCase(),hash:await bcrypt.hash(ADMIN_PASSWORD,10),name:'الإدارة',role:'admin',active:true,createdAt:new Date()});console.log('تم إنشاء حساب الإدارة')}
- app.listen(PORT,()=>console.log('يعمل على المنفذ '+PORT))})().catch(e=>{console.error(e);process.exit(1)});
+ app.listen(PORT,()=>{console.log('يعمل على المنفذ '+PORT);keepAlive()})})().catch(e=>{console.error(e);process.exit(1)});
+
+/* منع نوم الخدمة على Render (الخطة المجانية تنام بعد ~15 دقيقة بلا زيارات): نداء ذاتي كل 10 دقائق.
+   يعمل تلقائياً على Render عبر RENDER_EXTERNAL_URL، أو عبر KEEPALIVE_URL يدوياً. KEEPALIVE=off لإيقافه. */
+function keepAlive(){const u=process.env.KEEPALIVE_URL||process.env.RENDER_EXTERNAL_URL;if(!u||process.env.KEEPALIVE==='off')return;
+ const url=u.replace(/\/+$/,'')+'/healthz',ping=()=>fetch(url,{signal:AbortSignal.timeout(20000)}).then(r=>console.log('keep-alive',r.status)).catch(e=>console.warn('keep-alive فشل:',e.message));
+ setInterval(ping,10*60*1000).unref();console.log('keep-alive مفعّل ->',url)}
