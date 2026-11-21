@@ -133,6 +133,25 @@ html[data-ut=glass] #um .box{background:var(--bg)}
 .fm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:21px;font-weight:700;padding:10px;border:1px solid var(--bd);border-radius:var(--ri);background:var(--card)}
 .fm .mv{background:color-mix(in srgb,var(--teal) 20%,var(--card));padding:1px 8px;border-radius:6px;font-size:17px}.fm .mo{color:#c26a00}
 .fs{margin-top:8px;font-weight:700}.fs.ok{color:#0a7a2f}.fs.er{color:#c00}
+
+/* ===== تصدير PDF المرن ===== */
+#pxd{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:flex;align-items:flex-start;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 12px) 10px 12px;overflow:auto}
+#pxd .box{background:var(--card);color:var(--ink);border:1px solid var(--bd);border-radius:var(--r);width:min(680px,100%);padding:14px;margin:auto}
+html[data-ut=glass] #pxd .box{background:var(--bg)}
+#pxd h3{font-size:15px;margin:14px 0 6px}
+#pxd .pxl2{max-height:260px;overflow:auto;border:1px solid var(--bd);border-radius:8px;padding:6px;display:grid;gap:4px}
+#pxd .pxl2 label{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;cursor:pointer}
+#pxd .pxl2 label:hover{background:rgba(127,127,127,.12)}
+#pxd .pxl2 label.ar{opacity:.65}
+#pxd .pxsel{display:flex;flex-wrap:wrap;gap:6px;min-height:30px}
+#pxd .pxsel span{background:rgba(127,127,127,.15);border-radius:999px;padding:3px 10px;font-size:13px}
+#pxd button:disabled{opacity:.5;cursor:not-allowed}
+#pxo{display:none}
+.pxs{break-after:page}.pxs:last-child{break-after:auto}.pxs.p{page:pxp}.pxs.l{page:pxl}
+.pxsub{text-align:center;font-weight:700;margin:4px 0 6px}
+@page pxp{size:A4 portrait;margin:8mm}
+@page pxl{size:A4 landscape;margin:8mm}
+@media print{body.pxm main,body.pxm header.top{display:none!important}body.pxm #pxo{display:block}#pxd{display:none!important}.pxs .wrap{overflow:visible!important;max-height:none!important}.pxs table.g{width:100%}.pxs .g td span{font-size:13px}}
 </style>
 </head>
 <body>
@@ -163,7 +182,7 @@ $('#app').innerHTML=`<div class="card"><h2>بيانات الأستاذ</h2><div 
 <div class="card"><h2>الأقسام (${S.cl.length}) · التلاميذ: ${S.cl.reduce((a,c)=>a+c.st.length,0)}</h2>
 <div class="row"><select onchange="fs=this.value;render()"><option value="">كل المواسم (الأرشيف)</option>${seasons.map(s=>`<option ${s==fs?'selected':''}>${esc(s)}</option>`).join('')}</select>
 <select onchange="ft=this.value;render()"><option value="">كل الفصول</option>${[1,2,3].map(i=>`<option value="${i}" ${ft==i?'selected':''}>الفصل ${TN[i]}</option>`).join('')}</select>
-<select onchange="sa=+this.value;render()"><option value="0">الأقسام الحالية</option><option value="1" ${sa?'selected':''}>المؤرشفة</option></select><button class="fit" onclick="addClass()">+ قسم جديد</button></div><div style="margin-top:10px">
+<select onchange="sa=+this.value;render()"><option value="0">الأقسام الحالية</option><option value="1" ${sa?'selected':''}>المؤرشفة</option></select><button class="fit" onclick="addClass()">+ قسم جديد</button><button class="fit g" onclick="pxOpen()">تصدير PDF</button></div><div style="margin-top:10px">
 ${f.map(c=>`<div class="cls"><div><b>${esc(c.name)}</b><div class="mut">${esc(c.season)} · الفصل ${TN[c.term]} · ${c.st.length} تلميذ</div></div>
 <div class="row"><button class="fit" onclick="openC('${c.id}')">فتح</button><button class="fit g" onclick="copyC('${c.id}')">نسخ</button><button class="fit g" onclick="renC('${c.id}')">تعديل</button><button class="fit g" onclick="arC('${c.id}')">${c.ar?'استرجاع':'أرشفة'}</button><button class="fit d" onclick="delC('${c.id}')">حذف</button></div></div>`).join('')||'<p class="mut">لا توجد أقسام. أنشئ قسمك الأول.</p>'}</div></div>
 <div class="card"><h2>قوائم التلاميذ (Excel)</h2><div class="row"><button class="fit g" onclick="tpl()">تحميل نموذج Excel</button><button class="fit" onclick="$('#hx').click()">استيراد قوائم التلاميذ</button><input id="hx" type="file" class="hid" accept=".xlsx,.xls,.csv" onchange="xs(this,1)"></div><p class="mut">املأ عمود «القسم» لكل تلميذ؛ تُوزَّع القوائم على الأقسام الحالية (نفس الموسم والفصل)، وتُنشأ الأقسام غير الموجودة بعد تأكيدك.</p><div id="ip"></div></div>
@@ -186,7 +205,7 @@ function rs(i){const f=i.files[0];if(!f)return;f.text().then(t=>{try{const d=JSO
 const B=()=>cur.sub.find(s=>s.id==sub);
 const ord=()=>cur.sort=='alpha'?[...cur.st].sort((a,b)=>(a.ln+' '+a.fn).localeCompare(b.ln+' '+b.fn,'ar')):cur.st;
 const num=v=>{if(v===''||v==null)return null;const n=parseFloat(String(v).replace(',','.'));return isNaN(n)?null:n};
-const r2=v=>Math.round(+(v*100).toPrecision(12))/100,fa=v=>{if(v==null||isNaN(v)||r2(v)==0)return'00.0';const t=r2(v).toFixed(2);return t.endsWith('0')?t.slice(0,-1):t};
+const r2=v=>Math.round(+(v*100).toPrecision(12))/100,fa=v=>{if(v==null||v===''||isNaN(v))return'';if(r2(v)==0)return'00.0';const t=r2(v).toFixed(2);return t.endsWith('0')?t.slice(0,-1):t};
 const nf=x=>String(x??'').normalize('NFKC').replace(/[\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g,'').replace(/[٠-٩]/g,c=>c.charCodeAt(0)-0x660).replace(/[۰-۹]/g,c=>c.charCodeAt(0)-0x6f0).replace(/[٫،]/g,'.').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/[−–—]/g,'-').replace(/[\[{]/g,'(').replace(/[\]}]/g,')');
 /* ===== محرك المعادلات: محلل رياضي آمن (بدون eval ولا Function — لأن سياسة الأمان CSP تمنعهما) ===== */
 const FDEF='(cc+f+t*2)/4',OPD={'+':'+','-':'−','*':'×','/':'÷'},
@@ -279,7 +298,7 @@ $('#app').innerHTML=`<div class="card noprint">${c.sub.length>1?`<div class="tab
 <div class="row"><button class="fit g" onclick="setup()">إعدادات المادة والتقويم</button><button class="fit g" onclick="studs()">التلاميذ</button><button class="fit g" onclick="ppToggle()">تصميم PDF والإحصائيات</button><button class="fit g" onclick="nsGo(1)">لوحة الإحصائيات حسب النوع</button>
 <select class="fit" onchange="cur.sort=this.value;save();render()"><option value="orig" ${c.sort=='orig'?'selected':''}>الترتيب الأصلي</option><option value="alpha" ${c.sort=='alpha'?'selected':''}>أبجدي (لقب ثم اسم)</option></select>
 <select class="fit" id="or" onchange="orient()"><option value="portrait">A4 عمودي</option><option value="landscape">A4 أفقي</option></select>
-<select class="fit" onchange="document.querySelector('.wrap').style.zoom=this.value"><option value="1">تكبير 100%</option><option value="0.8">80%</option><option value="1.2">120%</option><option value="1.5">150%</option></select><button class="fit g" onclick="document.querySelector('.sheet').requestFullscreen&&document.querySelector('.sheet').requestFullscreen()">ملء الشاشة</button><button class="fit" onclick="print()">طباعة / PDF</button><button class="fit g" onclick="xp()">تصدير Excel</button><button class="fit g" onclick="$('#xf').click()">استيراد نقاط Excel</button><input id="xf" type="file" class="hid" accept=".xlsx,.xls,.csv" onchange="xm(this)"></div><div id="pn"></div><div id="pp"></div></div>
+<select class="fit" onchange="document.querySelector('.wrap').style.zoom=this.value"><option value="1">تكبير 100%</option><option value="0.8">80%</option><option value="1.2">120%</option><option value="1.5">150%</option></select><button class="fit g" onclick="document.querySelector('.sheet').requestFullscreen&&document.querySelector('.sheet').requestFullscreen()">ملء الشاشة</button><button class="fit" onclick="pxOpen()">تصدير PDF</button><button class="fit g" onclick="xp()">تصدير Excel</button><button class="fit g" onclick="$('#xf').click()">استيراد نقاط Excel</button><input id="xf" type="file" class="hid" accept=".xlsx,.xls,.csv" onchange="xm(this)"></div><div id="pn"></div><div id="pp"></div></div>
 ${b?sheet(b):''}`;stats(1);ppRender()}
 function sheet(b){const c=cur,cs=b.cats.filter(x=>x.on),p=S.p;
 return`<div class="sheet" ${pdfAttr()}><div class="band"><div class="b">دفتر التنقيط</div><div class="a">قسم ${esc(c.name)}</div></div>
@@ -294,11 +313,14 @@ const lg=a=>{(S.log=S.log||[]).push({t:Date.now(),a});if(S.log.length>500)S.log.
 function inp(id,k,el){const b=B();let v=el.value.replace(',','.').replace(/[^\d.]/g,'');const mx=k=='f'||k=='t'?20:b.cats.find(c=>c.id==k).max,n=parseFloat(v);
 el.parentNode.classList.toggle('bad',!isNaN(n)&&n>mx);if(!isNaN(n)&&n>mx){el.value=el.dataset.old||'';return alert('العلامة القصوى: '+mx)}
 el.value=v;el.dataset.old=v;const m=b.m[id]=b.m[id]||{c:{}};m.c=m.c||{};if(k=='f'||k=='t')m[k]=v;else m.c[k]=v;lg(cur.name+' / '+b.name+': '+cur.st.find(s=>s.id==id).ln+' ['+k.slice(0,3)+'] = '+v);save();row(b,id);stats()}
-function row(b,id){const r=calc(b,id),a=$('#av_'+id);$('#cc_'+id).textContent=fm(r.cc);const bd=r.av==null&&(r.cc!=null||r.f!=null||r.t!=null);a.textContent=bd?'خطأ':fa(r.av);a.title=bd?'المعادلة غير صالحة: أعد كتابتها في «إعدادات المادة والتقويم»':'';a.className='ro '+(r.av==null?'':r.av>=10?'pass':'fail')}
+const avTxt=r=>r.av==null?((r.cc!=null||r.f!=null||r.t!=null)?'خطأ':''):fa(r.av);
+function row(b,id){const r=calc(b,id),a=$('#av_'+id);$('#cc_'+id).textContent=fm(r.cc);const bd=r.av==null&&(r.cc!=null||r.f!=null||r.t!=null);a.textContent=avTxt(r);a.title=bd?'المعادلة غير صالحة: أعد كتابتها في «إعدادات المادة والتقويم»':'';a.className='ro '+(r.av==null?'':r.av>=10?'pass':'fail')}
 function kd(e,el){if(e.key=='Enter'){e.preventDefault();const l=[...document.querySelectorAll(`input[data-k="${el.dataset.k}"]`)],i=l.indexOf(el);(l[i+1]||l[0]).focus();(l[i+1]||l[0]).select()}}
-function stats(fc){const b=B();if(!b)return;const ids=cur.st.map(s=>s.id);ids.forEach(i=>row(b,i));const d=sdata(b,cur),a=d.rows.map(x=>x.av),n=d.n,ps=d.ps,R=[[16,21,'من 16 إلى 20'],[12,16,'من 12 إلى أقل من 16'],[10,12,'من 10 إلى أقل من 12'],[7,10,'من 7 إلى أقل من 10'],[5,7,'من 5 إلى أقل من 7'],[0,5,'من 0 إلى أقل من 5']];
-const e=$('#kp');if(!e)return;e.innerHTML=pdfCfg().kp?`<div class="st"><div class="a0"><span>عدد التلاميذ</span><span>${ids.length}</span></div><div class="a0"><span>المنقّطون</span><span>${n}</span></div><div class="a1"><span>الناجحون (≥10)</span><span>${ps}</span></div><div class="a1"><span>نسبة النجاح</span><span>${n?(ps/n*100).toFixed(1)+'%':'—'}</span></div><div class="a3"><span>غير الناجحين (&lt;10)</span><span>${n-ps}</span></div><div class="a3"><span>نسبة غير الناجحين</span><span>${n?((n-ps)/n*100).toFixed(1)+'%':'—'}</span></div><div class="a0"><span>معدل القسم</span><span>${n?fa(a.reduce((x,y)=>x+y,0)/n):'—'}</span></div><div class="a2"><span>أكبر علامة</span><span>${n?fa(Math.max(...a)):'—'}</span></div><div class="a3"><span>أدنى علامة</span><span>${n?fa(Math.min(...a)):'—'}</span></div>
-${R.map(r=>`<div><span>${r[2]}</span><span>${a.filter(v=>v>=r[0]&&v<r[1]).length}</span></div>`).join('')}</div>`:'';
+const RB=[[16,21,'من 16 إلى 20'],[12,16,'من 12 إلى أقل من 16'],[10,12,'من 10 إلى أقل من 12'],[7,10,'من 7 إلى أقل من 10'],[5,7,'من 5 إلى أقل من 7'],[0,5,'من 0 إلى أقل من 5']];
+function kpHTML(b,c){const d=sdata(b,c),a=d.rows.map(x=>x.av),n=d.n,ps=d.ps,ids=c.st,R=RB;return`<div class="st"><div class="a0"><span>عدد التلاميذ</span><span>${ids.length}</span></div><div class="a0"><span>المنقّطون</span><span>${n}</span></div><div class="a1"><span>الناجحون (≥10)</span><span>${ps}</span></div><div class="a1"><span>نسبة النجاح</span><span>${n?(ps/n*100).toFixed(1)+'%':'—'}</span></div><div class="a3"><span>غير الناجحين (&lt;10)</span><span>${n-ps}</span></div><div class="a3"><span>نسبة غير الناجحين</span><span>${n?((n-ps)/n*100).toFixed(1)+'%':'—'}</span></div><div class="a0"><span>معدل القسم</span><span>${n?fa(a.reduce((x,y)=>x+y,0)/n):'—'}</span></div><div class="a2"><span>أكبر علامة</span><span>${n?fa(Math.max(...a)):'—'}</span></div><div class="a3"><span>أدنى علامة</span><span>${n?fa(Math.min(...a)):'—'}</span></div>
+${R.map(r=>`<div><span>${r[2]}</span><span>${a.filter(v=>v>=r[0]&&v<r[1]).length}</span></div>`).join('')}</div>`}
+function stats(fc){const b=B();if(!b)return;const ids=cur.st.map(s=>s.id);ids.forEach(i=>row(b,i));
+const e=$('#kp');if(!e)return;e.innerHTML=pdfCfg().kp?kpHTML(b,cur):'';
 clearTimeout(ctm);const f=()=>{const x=$('#chs'),bb=B();if(x&&bb)x.innerHTML=chartsHTML(bb)};fc?f():ctm=setTimeout(f,160)}
 function orient(){let s=$('#ps');if(!s){s=document.createElement('style');s.id='ps';document.head.appendChild(s)}s.textContent='@media print{@page{size:A4 '+$('#or').value+'}}'}
 function setup(){const b=B(),tot=b.cats.filter(x=>x.on).reduce((a,x)=>a+(+x.max||0),0);
@@ -346,7 +368,7 @@ ${add?`<div class="sheet" style="margin-top:8px"><div class="wrap" style="max-he
 <div class="row" style="margin-top:8px"><button class="fit" ${add?'':'disabled'} onclick="impOk()">تأكيد استيراد ${add}</button><button class="fit g" onclick="IM=null;$('#ip').innerHTML=''">إلغاء</button></div></div>`});i.value=''}
 function impOk(){if(!IM)return;let k=0;IM.items.forEach(e=>{let t=e.t;if(t.nw){t={id:uid(),name:t.name,season:S.p.season,term:S.p.term,sort:'orig',st:[],sub:[newSub(curSubj())]};S.cl.push(t)}e.st.forEach(s=>{t.st.push({id:uid(),...s});k++});lg('استيراد '+e.st.length+' تلميذ إلى '+t.name)});IM=null;save();render();if(cur)studs();alert('تم استيراد '+k+' تلميذ')}
 function xp(){const b=B(),cs=b.cats.filter(x=>x.on),h=['المعرف','اللقب','الاسم',...cs.map(x=>x.name+' /'+x.max),'المجموع','الفرض','الاختبار','المعدل'];
-const d=[h,...ord().map(s=>{const m=b.m[s.id]||{},r=calc(b,s.id);return[s.id,s.ln,s.fn,...cs.map(x=>num(m.c?.[x.id])??''),r.cc??'',r.f??'',r.t??'',r.av==null?'00.0':r.av]})];
+const d=[h,...ord().map(s=>{const m=b.m[s.id]||{},r=calc(b,s.id);return[s.id,s.ln,s.fn,...cs.map(x=>num(m.c?.[x.id])??''),r.cc??'',r.f??'',r.t??'',r.av==null?'':r.av]})];
 const w=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(d);d.forEach((r,i)=>{if(i&&typeof r[r.length-1]=='number'){const a=XLSX.utils.encode_cell({r:i,c:r.length-1});if(ws[a])ws[a].z='0.0#'}});XLSX.utils.book_append_sheet(w,ws,'النقاط');XLSX.writeFile(w,`${cur.name}-${b.name}.xlsx`)}
 function xm(i){const f=i.files[0];if(!f)return;const b=B(),cs=b.cats.filter(x=>x.on);rd(f,rows=>{const ch=[];rows.slice(1).forEach(x=>{const s=cur.st.find(s=>s.id==x[0]);if(!s)return;const m=b.m[s.id]||{c:{}},nm={c:{...m.c}};let d=0;
 cs.forEach((c,j)=>{const v=num(x[3+j]);if(v!=null&&v<=c.max&&String(v)!=String(m.c?.[c.id]??'')){nm.c[c.id]=String(v);d++}});const o=3+cs.length;[['f',o+1],['t',o+2]].forEach(([k,j])=>{const v=num(x[j]);if(v!=null&&v<=20&&String(v)!=String(m[k]??'')){nm[k]=String(v);d++}});if(d)ch.push([s,nm,d])});
@@ -472,7 +494,7 @@ if(nz.length==1){const x=nz[0];s+=ri?`<circle cx="${cx}" cy="${cy}" r="${rm}" fi
 else nz.forEach(x=>{const fr=x.v/tot,a1=a+fr*Math.PI*2;s+=`<path d="${arc(cx,cy,r,ri,a,a1)}" fill="${x.c}" stroke="#fff" stroke-width="2"/>`+lab(x,(a+a1)/2,fr);a=a1});
 if(ri&&mid!=null)s+=tx(cx,cy-2,'المعدل',{s:12,f:'#667'})+tx(cx,cy+22,mid,{s:26,w:800});return svg(H,s)}
 function pieC(d){const sl=[{n:'ناجحون',v:d.ps,c:'#43a982'},{n:'غير ناجحين',v:d.fl,c:'#d64545'}];return ring(sl,0)+lgd(sl.map(x=>[x.c,`${x.n}: <bdi dir="ltr">${x.v} (${pcs(x.v,d.n)})</bdi>`]))}
-function doughC(d){const sl=RS.map((r,i)=>({n:r[2],v:d.dist[i],c:CC[i]}));return ring(sl,58,fa(d.avg))+lgd(sl.map(x=>[x.c,`<bdi dir="ltr">${x.n}: ${x.v}</bdi>`]))}
+function doughC(d){const sl=RS.map((r,i)=>({n:r[2],v:d.dist[i],c:CC[i]}));return ring(sl,58,fa(d.avg)||'—')+lgd(sl.map(x=>[x.c,`<bdi dir="ltr">${x.n}: ${x.v}</bdi>`]))}
 function stackC(d){const sx=r=>r.g!='ذكر'&&r.g!='أنثى',hg=d.rows.some(r=>!sx(r));let sg;
 if(hg){sg=[['ذكر','#3b82c4',r=>r.g=='ذكر'],['أنثى','#d4679f',r=>r.g=='أنثى']];if(d.rows.some(sx))sg.push(['غير محدد','#9aa5b1',sx])}else sg=[['ناجحون','#43a982',r=>r.av>=10],['غير ناجحين','#d64545',r=>r.av<10]];
 const m=RS.map(r=>sg.map(g=>d.rows.filter(x=>x.av>=r[0]&&x.av<r[1]&&g[2](x)).length)),tot=m.map(a=>a.reduce((x,y)=>x+y,0)),H=232,L=10,R=W-34,T=26,B=34,ph=H-T-B,bw=(R-L)/6,top=niceMax(Math.max(...tot,1));let s=axis(top,L,R,T,ph);
@@ -522,7 +544,7 @@ function nRing(sl,ri,mid){const tot=sl.reduce((a,x)=>a+x.v,0),H=320,cx=NW/2,cy=1
  else nz.forEach(x=>{const fr=x.v/tot,a1=a+fr*Math.PI*2;s+=`<path d="${arc(cx,cy,r,ri,a,a1)}" fill="${x.c}" stroke="#fff" stroke-width="2"/>`+lab(x,(a+a1)/2,fr);a=a1});
  if(ri&&mid!=null)s+=tx(cx,cy-4,'المعدل',{s:15,f:'#667'})+tx(cx,cy+30,mid,{s:34,w:800});return nsv(H,s)}
 function nPie(d){const sl=[{n:'ناجحون',v:d.pass,c:'#43a982'},{n:'غير ناجحين',v:d.fail,c:'#d64545'}];return nRing(sl,0)+lgd(sl.map(x=>[x.c,`${x.n} (≥ ${f1(d.max/2)}): <bdi dir="ltr">${x.v} (${pcs(x.v,d.n)})</bdi>`]))}
-function nDough(d){const sl=d.bands.map((q,i)=>({n:q.l,v:d.dist[i],c:CC[i]}));return nRing(sl,70,fa(d.avg))+lgd(sl.map(x=>[x.c,`<bdi dir="ltr">${x.n}: ${x.v}</bdi>`]))}
+function nDough(d){const sl=d.bands.map((q,i)=>({n:q.l,v:d.dist[i],c:CC[i]}));return nRing(sl,70,fa(d.avg)||'—')+lgd(sl.map(x=>[x.c,`<bdi dir="ltr">${x.n}: ${x.v}</bdi>`]))}
 function nStack(d){const sx=r=>r.g!='ذكر'&&r.g!='أنثى',hg=d.rows.some(r=>!sx(r)),th=d.max/2;let sg;
  if(hg){sg=[['ذكر','#3b82c4',r=>r.g=='ذكر'],['أنثى','#d4679f',r=>r.g=='أنثى']];if(d.rows.some(sx))sg.push(['غير محدد','#9aa5b1',sx])}else sg=[['ناجحون','#43a982',r=>r.v>=th-NE],['غير ناجحين','#d64545',r=>r.v<th-NE]];
  const inb=(r,i)=>r.v>=d.bands[i].lo-NE&&(i==5||r.v<d.bands[i].hi-NE),m=d.bands.map((q,i)=>sg.map(x=>d.rows.filter(r=>inb(r,i)&&x[2](r)).length)),tot=m.map(a=>a.reduce((x,y)=>x+y,0)),H=310,L=14,R=NW-50,T=34,Bt=50,ph=H-T-Bt,bw=(R-L)/6,top=niceMax(Math.max(...tot,1));let s=nax(top,L,R,T,ph);
@@ -549,9 +571,51 @@ ${NSV.type=='cont'?`<div class="row"><select onchange="nsSet('crit',this.value)"
 function nsSet(k,v){NSV[k]=v;render()}
 function nsChart(v){S.prefs=S.prefs||{};const o=S.prefs.ns=S.prefs.ns||{};o.ch=o.ch||{};o.ch[NSV.type]=v;save();render()}
 function nsGo(on){nsOn=!!on;render();scrollTo(0,0)}
-function nsPrint(all){NSV.all=all;render();setTimeout(()=>print(),60)}
+function nsPrint(all){pxUnmount();NSV.all=all;render();setTimeout(()=>print(),60)}
 function nsLive(){clearTimeout(NSV.tm);NSV.tm=setTimeout(()=>{const x=$('#nsb');if(x&&cur&&B())x.innerHTML=nsBody(B(),cur)},120)}
 addEventListener('afterprint',()=>{if(NSV.all){NSV.all=0;if(nsOn&&cur)nsView()}});
+
+/* ===== تصدير PDF المرن: اختيار الأقسام + مع/بدون الإحصائيات (اختيار مستقل في كل عملية تصدير) ===== */
+let PX={st:1,or:'auto',sel:new Set(),fs:'',ft:'',ar:0};
+const pxList=()=>S.cl.filter(c=>(!PX.fs||c.season==PX.fs)&&(!PX.ft||c.term==PX.ft)&&(PX.ar||!c.ar));
+function pxOpen(){if(!S||!Array.isArray(S.cl))return;
+ const k=cur&&S.cl.includes(cur)?cur:null;
+ PX={st:1,or:'auto',sel:new Set(k?[k.id]:S.cl.filter(c=>!c.ar).map(c=>c.id)),fs:k?k.season:'',ft:k?String(k.term):'',ar:k&&k.ar?1:0};pxR()}
+function pxR(){let m=$('#pxd');if(!m){m=document.createElement('div');m.id='pxd';m.className='noprint';document.body.appendChild(m)}
+ const L=pxList(),seasons=[...new Set(S.cl.map(c=>c.season))];
+ m.innerHTML=`<div class="box" role="dialog" aria-label="تصدير PDF"><h2 style="margin:0 0 4px">تصدير PDF</h2><p class="mut" style="margin:0">اختر المحتوى والأقسام ثم اضغط «تصدير». سيُفتح مربع الطباعة: اختر «حفظ بصيغة PDF».</p>
+<h3>1) الإحصائيات</h3><div class="chips"><label class="chip"><input type="radio" name="pxst" ${PX.st?'checked':''} onchange="PX.st=1;pxSum()"> مع الإحصائيات</label><label class="chip"><input type="radio" name="pxst" ${PX.st?'':'checked'} onchange="PX.st=0;pxSum()"> بدون إحصائيات (الجداول فقط)</label></div>
+<h3>2) اتجاه الصفحة</h3><select onchange="PX.or=this.value;pxSum()"><option value="auto" ${PX.or=='auto'?'selected':''}>تلقائي (حسب عرض الجدول)</option><option value="portrait" ${PX.or=='portrait'?'selected':''}>A4 عمودي</option><option value="landscape" ${PX.or=='landscape'?'selected':''}>A4 أفقي</option></select>
+<h3>3) الأقسام</h3><div class="row"><select onchange="PX.fs=this.value;pxR()"><option value="">كل المواسم</option>${seasons.map(s=>`<option value="${esc(s)}" ${s==PX.fs?'selected':''}>${esc(s)}</option>`).join('')}</select><select onchange="PX.ft=this.value;pxR()"><option value="">كل الفصول</option>${[1,2,3].map(i=>`<option value="${i}" ${PX.ft==i?'selected':''}>الفصل ${TN[i]}</option>`).join('')}</select><label class="chip"><input type="checkbox" ${PX.ar?'checked':''} onchange="PX.ar=this.checked?1:0;pxR()"> المؤرشفة</label></div>
+<div class="row" style="margin:8px 0"><button class="fit g" onclick="pxAll(1)">تحديد الكل</button><button class="fit g" onclick="pxAll(0)">إلغاء تحديد الكل</button></div>
+<div class="pxl2">${L.map(c=>`<label class="${c.ar?'ar':''}"><input type="checkbox" class="pxc" value="${c.id}" ${PX.sel.has(c.id)?'checked':''} onchange="pxT('${c.id}',this.checked)"><span><b>${esc(c.name)}</b> <span class="mut">${esc(c.season)} · الفصل ${TN[c.term]} · ${c.st.length} تلميذ${c.ar?' · مؤرشف':''}</span></span></label>`).join('')||'<p class="mut">لا توجد أقسام ضمن هذا التصفية.</p>'}</div>
+<h3>الأقسام المختارة قبل التصدير: <span id="pxn"></span></h3><div class="pxsel" id="pxs"></div><p class="mut" id="pxo2"></p>
+<div class="row" style="margin-top:12px"><button class="fit" id="pxg" onclick="pxGo()">تصدير</button><button class="fit g" onclick="pxClose()">إغلاق</button></div></div>`;pxSum()}
+function pxSum(){const s=S.cl.filter(c=>PX.sel.has(c.id)),$$=i=>document.getElementById(i);if(!$$('pxs'))return;
+ $$('pxn').textContent=s.length;$$('pxs').innerHTML=s.map(c=>`<span>${esc(c.name)} · ${esc(c.season)} ف${TN[c.term]}</span>`).join('')||'<span class="mut">لم يُحدَّد أي قسم</span>';
+ $$('pxo2').textContent=(PX.st?'مع الإحصائيات':'بدون إحصائيات')+' · الاتجاه: '+({auto:'تلقائي',portrait:'عمودي',landscape:'أفقي'}[PX.or]);$$('pxg').disabled=!s.length}
+function pxT(id,on){on?PX.sel.add(id):PX.sel.delete(id);pxSum()}
+function pxAll(on){pxList().forEach(c=>on?PX.sel.add(c.id):PX.sel.delete(c.id));document.querySelectorAll('#pxd .pxc').forEach(i=>i.checked=!!on);pxSum()}
+function pxClose(){const m=$('#pxd');if(m)m.remove()}
+function pxMount(h){pxUnmount();const x=document.createElement('div');x.id='pxo';x.innerHTML=h;document.body.appendChild(x);document.body.classList.add('pxm')}
+function pxUnmount(){const x=document.getElementById('pxo');if(x)x.remove();document.body.classList.remove('pxm')}
+function pxGo(){const cl=S.cl.filter(c=>PX.sel.has(c.id));if(!cl.length)return alert('اختر قسماً واحداً على الأقل');
+ let h;try{h=pxBuild(cl,{st:PX.st,or:PX.or})}catch(e){console.error(e);return alert('تعذّر إنشاء ملف PDF: '+e.message)}
+ pxClose();pxMount(h);setTimeout(()=>print(),150)}
+function pxBuild(cl,o){const sc=cur,ss=sub;let out='';
+ try{cl.forEach(c=>{(c.sub.length?c.sub:[newSub(curSubj())]).forEach(b=>{cur=c;sub=b.id;out+=pxSec(c,b,o)})})}finally{cur=sc;sub=ss}return out}
+function pxSec(c,b,o){const cs=b.cats.filter(x=>x.on),n=cs.length,W=264+(n+4)*54,PW=734,LW=1063;
+ const or=o.or=='landscape'?'l':o.or=='portrait'?'p':(W<=760?'p':'l'),av=or=='l'?LW:PW,z=Math.min(1,av/(264+(n+4)*40));
+ const d=document.createElement('div');d.innerHTML=sheet(b);const sh=d.firstElementChild;
+ sh.querySelectorAll('td input').forEach(i=>{const s=document.createElement('span');s.textContent=i.getAttribute('value')||'';i.replaceWith(s)});
+ c.st.forEach(s=>{const r=calc(b,s.id),a=sh.querySelector('[id="av_'+s.id+'"]'),k=sh.querySelector('[id="cc_'+s.id+'"]');if(!a||!k)return;
+  k.textContent=fm(r.cc);a.textContent=avTxt(r);a.className='ro '+(r.av==null?'':r.av>=10?'pass':'fail')});
+ const st=sh.querySelector('#stt');
+ if(st){if(o.st){const k=pdfCfg().kp?kpHTML(b,c):'',g=chartsHTML(b);if(k||g){st.querySelector('#kp').innerHTML=k;st.querySelector('#chs').innerHTML=g}else st.remove()}else st.remove()}
+ if(c.sub.length>1){const t=sh.querySelector('.ttl');if(t)t.insertAdjacentHTML('afterend','<div class="pxsub">المادة: '+esc(b.name)+'</div>')}
+ if(z<1){const w=sh.querySelector('.wrap');if(w)w.style.zoom=z}
+ return'<section class="pxs '+or+'">'+sh.outerHTML+'</section>'}
+addEventListener('afterprint',pxUnmount);
 
 boot();
 </script>
