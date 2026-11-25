@@ -199,12 +199,13 @@ main{width:100%;flex:1 0 auto}
 </style>
 </head>
 <body>
-<header class="top"><b>دفتر التنقيط</b><span id="hs"></span><small id="sv" style="opacity:.8"></small><button class="g" onclick="home()">الرئيسية</button><button id="ab" class="g hid" onclick="adminView()">الإدارة</button><button class="g" onclick="uiOpen()">المظهر</button><button class="g" onclick="logout()">خروج</button></header>
+<header class="top"><b>دفتر التنقيط</b><span id="hs"></span><small id="sv" style="opacity:.8"></small><button class="g" onclick="home()">الرئيسية</button><button class="g" onclick="cjGo()">الدفتر اليومي</button><button id="ab" class="g hid" onclick="adminView()">الإدارة</button><button class="g" onclick="uiOpen()">المظهر</button><button class="g" onclick="logout()">خروج</button></header>
 <main id="app"></main>
 <footer id="ft" class="noprint"><i>✦</i><span>من تصميم الأستاذ <b>قرفي عفيف</b></span><i>✦</i></footer>
+<script src="journal.js?v=1"></script>
 <script>
 const K='dtq1',$=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let S=null;const DEF=()=>({p:{season:'2026/2027',term:'1',type:'متوسطة'},cl:[]});let cur=null,sub=null,fs='',ft='',sa=0,nsOn=false;
+let S=null;const DEF=()=>({p:{season:'2026/2027',term:'1',type:'متوسطة'},cl:[]});let cur=null,sub=null,fs='',ft='',sa=0,nsOn=false,cjOn=false;
 let TK=localStorage.getItem('dtk'),ME=null,VER=0,tm=0,busy=false,again=false;
 const sv=x=>{const e=$('#sv');if(e)e.textContent=x};
 async function api(p,m='GET',b){const r=await fetch('/api'+p,{method:m,keepalive:m=='PUT',headers:{'Content-Type':'application/json',...(TK?{Authorization:'Bearer '+TK}:{})},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(j.error||'خطأ في الاتصال'),{status:r.status});return j}
@@ -212,11 +213,11 @@ const save=()=>{if(nsOn)nsLive();if(!ME||ME.role!='teacher')return;sv('جارٍ 
 async function push(){tm=0;if(busy){again=true;return}busy=true;try{const r=await api('/data','PUT',{state:S,ver:VER});VER=r.ver;sv('تم الحفظ ✓')}catch(e){sv('فشل الحفظ');if(e.status==409||e.status==401){alert(e.message);location.reload()}else setTimeout(push,4000)}busy=false;if(again){again=false;push()}}
 addEventListener('visibilitychange',()=>{if(document.hidden&&tm){clearTimeout(tm);push()}});
 const TN={1:'الأول',2:'الثاني',3:'الثالث'};
-function home(){cur=null;nsOn=false;render()}
-function render(){$('#app').style.maxWidth=(cur&&nsOn&&!(ME&&ME.role=='admin'))?'1900px':'';if(ME&&ME.role=='admin')return adminView();$('#hs').textContent=S.p.name?('الأستاذ: '+S.p.name):'';cur?(nsOn?nsView():classView()):homeView()}
+function home(){cur=null;nsOn=false;cjOn=false;render()}
+function render(){$('#app').style.maxWidth=(cur&&nsOn&&!(ME&&ME.role=='admin'))?'1900px':'';if(ME&&ME.role=='admin')return adminView();if(cjOn&&window.cjView)return cjView();$('#hs').textContent=S.p.name?('الأستاذ: '+S.p.name):'';cur?(nsOn?nsView():classView()):homeView()}
 function homeView(){
 const p=S.p,seasons=[...new Set(S.cl.map(c=>c.season))],f=S.cl.filter(c=>(!fs||c.season==fs)&&(!ft||c.term==ft)&&(!!c.ar==!!sa));
-$('#app').innerHTML=`<div class="card"><h2>بيانات الأستاذ</h2><div class="row">
+$('#app').innerHTML=(window.modNav?modNav('tq'):'')+`<div class="card"><h2>بيانات الأستاذ</h2><div class="row">
 <input placeholder="الاسم واللقب" value="${esc(p.name)}" oninput="S.p.name=this.value;save()">
 <input placeholder="مديرية التربية" value="${esc(p.dir)}" oninput="S.p.dir=this.value;save()">
 <input placeholder="المؤسسة التربوية" value="${esc(p.school)}" oninput="S.p.school=this.value;save()">
@@ -420,7 +421,7 @@ cs.forEach((c,j)=>{const v=num(x[3+j]);if(v!=null&&v<=c.max&&String(v)!=String(m
 if(!ch.length)return alert('لا توجد تغييرات (تأكد أن عمود المعرف غير معدّل).');if(confirm(`تحديث ${ch.reduce((a,x)=>a+x[2],0)} علامة لـ ${ch.length} تلميذ؟ مثال: ${ch[0][0].ln} ${ch[0][0].fn}`)){ch.forEach(([s,nm])=>b.m[s.id]={...b.m[s.id],...nm,c:nm.c});save();render()}});i.value=''}
 function loginView(){$('#hs').textContent='';sv('');$('#ab').classList.add('hid');$('#app').innerHTML=`<div class="card" style="max-width:420px;margin:40px auto"><h2>تسجيل الدخول</h2><div class="row"><input id="lu" placeholder="اسم المستخدم" autocomplete="username"><input id="lp" type="password" placeholder="كلمة المرور" autocomplete="current-password" onkeydown="if(event.key=='Enter')login()"><button class="fit" onclick="login()">دخول</button></div><p id="le" style="color:#d33"></p></div>`}
 async function login(){try{const r=await api('/login','POST',{username:$('#lu').value,password:$('#lp').value});TK=r.token;localStorage.setItem('dtk',TK);boot()}catch(e){$('#le').textContent=e.message}}
-async function logout(){if(tm)await push();localStorage.removeItem('dtk');TK=null;ME=null;S=null;cur=null;loginView()}
+async function logout(){if(tm)await push();localStorage.removeItem('dtk');TK=null;ME=null;S=null;cur=null;cjOn=false;loginView()}
 async function boot(){if(!TK)return loginView();try{ME=(await api('/me')).user}catch(e){return logout()}
 $('#ab').classList.toggle('hid',ME.role!='admin');$('#hs').textContent=ME.name||ME.username;if(ME.role=='admin')return adminView();
 try{const d=await api('/data');S=d.state||null;VER=d.ver||0;if(!S){let o=null;try{o=JSON.parse(localStorage.getItem(K)||'null')}catch(e){}
@@ -706,7 +707,7 @@ function pdfFonts(){return PGFC||(PGFC=(async()=>{try{const l=document.querySele
  const data=new Map(),get=u=>data.get(u)||data.set(u,fetch(u,{mode:'cors'}).then(r=>r.blob()).then(b=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(b)}))).get(u);
  const out=await Promise.all([...g.values()].map(async x=>{try{const d=await get(x.u),ur=(x.body.match(/unicode-range:\s*([^;]+)/)||[])[1],w=x.w.length?(Math.min(...x.w)==Math.max(...x.w)?x.w[0]:Math.min(...x.w)+' '+Math.max(...x.w)):400;
   return`@font-face{font-family:'${x.f}';font-style:normal;font-weight:${w};src:url(${d});${ur?'unicode-range:'+ur+';':''}}`}catch(e){return''}}));return out.join('\n')}catch(e){console.warn('تعذّر تضمين الخطوط، ستُستعمل خطوط النظام',e);return''}})())}
-const pdfCss=()=>{const s=document.querySelector('style');return(s?s.textContent:'').replace(/@media\(prefers-color-scheme:dark\)\{[^}]*\{[^}]*\}\}/,'')}
+const pdfCss=()=>{const s=document.querySelector('style');return(s?s.textContent:'').replace(/@media\(prefers-color-scheme:dark\)\{[^}]*\{[^}]*\}\}/,'')+'\n'+(window.CJ_PCSS||'')}
 function pdfB64(s){const u=new TextEncoder().encode(s);let b='';for(let i=0;i<u.length;i+=32768)b+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(b)}
 async function pdfRaster(el,w,h,css,sc,warm){
  const xml=new XMLSerializer().serializeToString(el),svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><style><![CDATA[${css}]]></style><foreignObject x="0" y="0" width="${w}" height="${h}">${xml}</foreignObject></svg>`,

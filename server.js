@@ -49,13 +49,78 @@ app.patch('/api/users/:id',A,wrap(async(q,s)=>{const id=oid(q.params.id);if(!id)
  if(!Object.keys(set).length)return bad(s,'لا تغييرات');const r=await col('users').updateOne({_id:id},{$set:set});if(!r.matchedCount)return s.status(404).json({error:'غير موجود'});
  audit(q.user._id,'update_user',String(id)+' '+Object.keys(set).join(','));s.json({ok:1})}));
 app.delete('/api/users/:id',A,wrap(async(q,s)=>{const id=oid(q.params.id),u=id&&await col('users').findOne({_id:id});if(!u)return s.status(404).json({error:'غير موجود'});if(u.role!=='teacher')return bad(s,'لا يمكن حذف حساب الإدارة');
- await Promise.all([col('users').deleteOne({_id:id}),col('data').deleteOne({_id:id}),col('snapshots').deleteMany({uid:id})]);audit(q.user._id,'delete_user',u.username);s.json({ok:1})}));
+ await Promise.all([col('users').deleteOne({_id:id}),col('data').deleteOne({_id:id}),col('snapshots').deleteMany({uid:id}),col('cj_schedules').deleteMany({uid:id}),col('cj_lessons').deleteMany({uid:id}),col('cj_settings').deleteMany({uid:id})]);audit(q.user._id,'delete_user',u.username);s.json({ok:1})}));
+
+
+// ===== الدفتر اليومي (Cahier Journal): مجموعات مستقلة cj_* معزولة بمعرّف الحساب، لا تمسّ وثيقة دفتر التنقيط =====
+// الجداول الزمنية: كل جدول له فترة (بداية/نهاية اختيارية). الدروس: وثيقة مستقلة لكل (موسم، تاريخ، حصة) تحفظ اسم القسم نفسه،
+// فلا تتأثر الدروس المسجلة بأي تعديل لاحق على الجداول. التواريخ نصوص YYYY-MM-DD (لا مناطق زمنية).
+const T=auth(['teacher']),CJ_SLOTS=['m1','m2','m3','m4','a1','a2','a3'],cs=(v,n)=>String(v==null?'':v).replace(/\s+/g,' ').trim().slice(0,n),csm=(v,n)=>String(v==null?'':v).replace(/\r/g,'').trim().slice(0,n);
+const isD=s=>{if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;const d=new Date(s+'T00:00:00Z');return !isNaN(d)&&d.toISOString().slice(0,10)===s};
+const dAdd=(s,n)=>new Date(Date.parse(s+'T00:00:00Z')+n*864e5).toISOString().slice(0,10),fD=s=>s.split('-').reverse().join('/'),MAXD='9999-12-31';
+const seasonOf=v=>cs(v,30);
+const cleanCells=c=>{const o={};if(c&&typeof c==='object')for(const k of Object.keys(c)){if(!/^[0-4]_(m[1-4]|a[1-3])$/.test(k))continue;const v=cs(c[k],100);if(v)o[k]=v}return o};
+const sOut=x=>({id:String(x._id),season:x.season,name:x.name,start:x.start,end:x.end||null,cells:x.cells||{},createdAt:x.createdAt,updatedAt:x.updatedAt});
+const lOut=x=>({id:String(x._id),season:x.season,date:x.date,slot:x.slot,section:x.section,axis:x.axis||'',topic:x.topic||'',cont:!!x.cont,items:x.items||[],absent:!!x.absent,createdAt:x.createdAt,updatedAt:x.updatedAt});
+
+// فحص الجدول: صلاحية التواريخ ومنع التداخل. autoClose: إنهاء جدول مفتوح سابق تلقائياً في اليوم السابق لبداية الجدول الجديد المفتوح.
+async function schCheck(q,b,selfId){b=b||{};const season=seasonOf(b.season),start=b.start,end=b.end==null||b.end===''?null:b.end;
+ if(!season)return{err:'الموسم الدراسي مطلوب'};if(!isD(start))return{err:'تاريخ البداية غير صالح'};if(end!==null&&!isD(end))return{err:'تاريخ النهاية غير صالح'};
+ if(end!==null&&end<start)return{err:'تاريخ النهاية يسبق تاريخ البداية'};
+ const all=await col('cj_schedules').find({uid:q.user._id,season}).toArray(),
+  conf=all.filter(x=>(!selfId||String(x._id)!==String(selfId))&&x.start<=(end||MAXD)&&start<=(x.end||MAXD)),
+  closable=end===null&&conf.length>0&&conf.every(x=>!x.end&&x.start<start);
+ if(conf.length&&!(b.autoClose&&closable))return{err:'تعارض في التواريخ مع: '+conf.map(x=>`«${x.name}» (${fD(x.start)} → ${x.end?fD(x.end):'مفتوح'})`).join('، '),conflicts:conf.map(sOut),canClose:closable};
+ return{doc:{season,name:cs(b.name,60)||'جدول',start,end,cells:cleanCells(b.cells)},close:conf};}
+const schErr=(s,r)=>s.status(r.conflicts?409:400).json({error:r.err,conflicts:r.conflicts,canClose:!!r.canClose});
+
+app.get('/api/cj/boot',T,wrap(async(q,s)=>{const season=seasonOf(q.query.season);if(!season)return bad(s,'الموسم مطلوب');const uid=q.user._id;
+ const[sch,set,cat,dates]=await Promise.all([
+  col('cj_schedules').find({uid,season}).sort({start:1}).toArray(),
+  col('cj_settings').findOne({uid,season}),
+  col('cj_lessons').aggregate([{$match:{uid,season,absent:{$ne:true}}},{$match:{$or:[{topic:{$ne:''}},{axis:{$ne:''}}]}},{$group:{_id:{s:'$section',a:'$axis',t:'$topic'},last:{$max:'$date'}}},{$limit:5000}]).toArray(),
+  col('cj_lessons').aggregate([{$match:{uid,season}},{$group:{_id:'$date',n:{$sum:1},a:{$sum:{$cond:['$absent',1,0]}}}},{$sort:{_id:1}},{$limit:5000}]).toArray()]);
+ s.json({schedules:sch.map(sOut),colors:(set&&set.colors)||[],hidden:(set&&set.hidden)||[],catalog:cat.map(x=>({section:x._id.s,axis:x._id.a||'',topic:x._id.t||'',last:x.last})),dates:dates.map(x=>({d:x._id,n:x.n,a:x.a}))})}));
+
+app.post('/api/cj/schedules',T,wrap(async(q,s)=>{const r=await schCheck(q,q.body);if(r.err)return schErr(s,r);const now=new Date();
+ for(const x of r.close)await col('cj_schedules').updateOne({_id:x._id,uid:q.user._id},{$set:{end:dAdd(r.doc.start,-1),updatedAt:now}});
+ const i=await col('cj_schedules').insertOne({...r.doc,uid:q.user._id,createdAt:now,updatedAt:now});audit(q.user._id,'cj_sched_add',String(i.insertedId));s.json({id:String(i.insertedId)})}));
+app.put('/api/cj/schedules/:id',T,wrap(async(q,s)=>{const id=oid(q.params.id),x=id&&await col('cj_schedules').findOne({_id:id,uid:q.user._id});if(!x)return s.status(404).json({error:'الجدول غير موجود'});
+ const r=await schCheck(q,{...q.body,season:x.season},id);if(r.err)return schErr(s,r);const now=new Date();
+ for(const c of r.close)await col('cj_schedules').updateOne({_id:c._id,uid:q.user._id},{$set:{end:dAdd(r.doc.start,-1),updatedAt:now}});
+ await col('cj_schedules').updateOne({_id:id,uid:q.user._id},{$set:{name:r.doc.name,start:r.doc.start,end:r.doc.end,cells:r.doc.cells,updatedAt:now}});audit(q.user._id,'cj_sched_edit',String(id));s.json({ok:1})}));
+app.delete('/api/cj/schedules/:id',T,wrap(async(q,s)=>{const id=oid(q.params.id);if(!id)return bad(s,'معرّف غير صالح');const r=await col('cj_schedules').deleteOne({_id:id,uid:q.user._id});if(!r.deletedCount)return s.status(404).json({error:'الجدول غير موجود'});audit(q.user._id,'cj_sched_del',String(id));s.json({ok:1})}));
+
+app.get('/api/cj/lessons',T,wrap(async(q,s)=>{const season=seasonOf(q.query.season),from=q.query.from,to=q.query.to;
+ if(!season||!isD(from)||!isD(to)||to<from||Date.parse(to)-Date.parse(from)>800*864e5)return bad(s,'معطيات غير صالحة');
+ const l=await col('cj_lessons').find({uid:q.user._id,season,date:{$gte:from,$lte:to}}).sort({date:1,slot:1}).toArray();s.json({list:l.map(lOut)})}));
+app.put('/api/cj/lessons',T,wrap(async(q,s)=>{const b=q.body||{},season=seasonOf(b.season),date=b.date,slot=b.slot,section=cs(b.section,100);
+ if(!season||!isD(date)||!CJ_SLOTS.includes(slot))return bad(s,'معطيات غير صالحة');const dw=new Date(date+'T00:00:00Z').getUTCDay();if(dw>4)return bad(s,'التاريخ ليس من أيام العمل (الأحد إلى الخميس)');
+ if(!section)return bad(s,'اختر القسم أولاً');
+ const items=(Array.isArray(b.items)?b.items:[]).slice(0,80).map(x=>csm(x,500)).filter(Boolean),axis=cs(b.axis,200),topic=cs(b.topic,300),absent=b.absent===true,cont=b.cont===true&&!!topic,uid=q.user._id;
+ if(!absent&&!axis&&!topic&&!items.length){await col('cj_lessons').deleteOne({uid,season,date,slot});return s.json({deleted:1})}   // لا نحفظ حصة فارغة تماماً
+ const now=new Date(),f={uid,season,date,slot},run=()=>col('cj_lessons').findOneAndUpdate(f,{$set:{section,axis,topic,cont,items,absent,updatedAt:now},$setOnInsert:{createdAt:now}},{upsert:true,returnDocument:'after'});
+ let r;try{r=await run()}catch(e){if(e.code===11000)r=await run();else throw e}
+ s.json({lesson:lOut(r.value||r)})}));
+app.delete('/api/cj/lessons',T,wrap(async(q,s)=>{const season=seasonOf(q.query.season),date=q.query.date,slot=q.query.slot;if(!season||!isD(date)||!CJ_SLOTS.includes(slot))return bad(s,'معطيات غير صالحة');
+ await col('cj_lessons').deleteOne({uid:q.user._id,season,date,slot});s.json({ok:1})}));
+app.get('/api/cj/catalog',T,wrap(async(q,s)=>{const season=seasonOf(q.query.season),uid=q.user._id;if(!season)return bad(s,'الموسم مطلوب');
+ const[cat,dates]=await Promise.all([col('cj_lessons').aggregate([{$match:{uid,season,absent:{$ne:true}}},{$match:{$or:[{topic:{$ne:''}},{axis:{$ne:''}}]}},{$group:{_id:{s:'$section',a:'$axis',t:'$topic'},last:{$max:'$date'}}},{$limit:5000}]).toArray(),
+  col('cj_lessons').aggregate([{$match:{uid,season}},{$group:{_id:'$date',n:{$sum:1},a:{$sum:{$cond:['$absent',1,0]}}}},{$sort:{_id:1}},{$limit:5000}]).toArray()]);
+ s.json({catalog:cat.map(x=>({section:x._id.s,axis:x._id.a||'',topic:x._id.t||'',last:x.last})),dates:dates.map(x=>({d:x._id,n:x.n,a:x.a}))})}));
+app.put('/api/cj/settings',T,wrap(async(q,s)=>{const b=q.body||{},season=seasonOf(b.season);if(!season)return bad(s,'الموسم مطلوب');
+ const colors=(Array.isArray(b.colors)?b.colors:[]).slice(0,300).map(x=>({n:cs(x&&x.n,100),c:String(x&&x.c||'').toLowerCase()})).filter(x=>x.n&&/^#[0-9a-f]{6}$/.test(x.c)),
+  hidden=(Array.isArray(b.hidden)?b.hidden:[]).slice(0,300).map(x=>cs(x,100)).filter(Boolean);
+ await col('cj_settings').updateOne({uid:q.user._id,season},{$set:{colors,hidden,updatedAt:new Date()},$setOnInsert:{createdAt:new Date()}},{upsert:true});s.json({ok:1})}));
 
 app.get('/healthz',(q,s)=>s.type('text').send('ok'));  // نقطة فحص خفيفة للإبقاء على الخدمة مستيقظة
 app.use(express.static(path.join(__dirname,'public')));
 app.use('/api',(q,s)=>s.status(404).json({error:'غير موجود'}));
 (async()=>{const cl=await new MongoClient(MONGODB_URI).connect();db=cl.db(DB_NAME);
  await col('users').createIndex({username:1},{unique:true});await col('snapshots').createIndex({uid:1,at:-1});
+ await col('cj_schedules').createIndex({uid:1,season:1,start:1});
+ await col('cj_lessons').createIndex({uid:1,season:1,date:1,slot:1},{unique:true});await col('cj_lessons').createIndex({uid:1,season:1,section:1});
+ await col('cj_settings').createIndex({uid:1,season:1},{unique:true});
  if(ADMIN_PASSWORD&&!(await col('users').findOne({role:'admin'}))){await col('users').insertOne({username:ADMIN_USER.toLowerCase(),hash:await bcrypt.hash(ADMIN_PASSWORD,10),name:'الإدارة',role:'admin',active:true,createdAt:new Date()});console.log('تم إنشاء حساب الإدارة')}
  app.listen(PORT,()=>{console.log('يعمل على المنفذ '+PORT);keepAlive()})})().catch(e=>{console.error(e);process.exit(1)});
 
